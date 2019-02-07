@@ -1,9 +1,19 @@
-import { App } from './app/app';
+import os from 'os';
+import cluster from 'cluster';
+
 import { Logger } from './app/common/logger';
 
-Logger.logTask('SYSTEM', 'STARTING');
+import { App } from './app/app';
 
-const app = new App();
-app.logAppInfo();
+if (cluster.isMaster) {
+  Logger.log('TOXMQ ACTIVE - FORKING WORKERS');
 
-Logger.logTask('SYSTEM', 'FINISHED');
+  os.cpus().forEach(() => cluster.fork());
+
+  cluster.on('exit', (worker: cluster.Worker) => {
+    Logger.log(`WORKER ${worker.id} DIED - CREATING NEW WORKER`);
+    cluster.fork();
+  });
+} else {
+  new App().start(cluster.worker);
+}

@@ -1,5 +1,7 @@
-import { IConfig } from './config.interface';
-
-export const config: IConfig = {
-  apiUrl: 'http://a-development-url'
+export const config = {
+  version: VERSION,
+  port: process.env.PORT || 8080,
+  allowedOrigins: [
+    'http://localhost:8080'
+  ]
 };

@@ -46,8 +46,8 @@ module.exports = env => {
       }),
       // Use module replacement to use different configs for dev and prod
       new webpack.NormalModuleReplacementPlugin(
-        /config.ts/,
-        env.mode === 'development' ? 'config.ts' : 'config.prod.ts'
+        /environment.ts/,
+        env.mode === 'development' ? 'environment.ts' : 'environment.prod.ts'
       )
     ],
   };

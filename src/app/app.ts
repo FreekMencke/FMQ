@@ -1,25 +1,30 @@
 import bodyParser from 'body-parser';
-import cluster from 'cluster';
+import { Worker } from 'cluster';
 import compression from 'compression';
 import cors from 'cors';
 import express, { Application } from 'express';
 import helmet from 'helmet';
+import { Db } from 'mongodb';
 import { config } from '../config/config';
 import { Logger } from './common/logger';
-import { HealthRouter } from './routes/health.router';
+import { HealthRouterFactory } from './routes/health.router-factory';
+import { QueueRouterFactory } from './routes/queue.router-factory';
+import { RouterFactory } from './routes/router.interface';
 
 export class App {
 
   private _app: Application;
+  private _db: Db;
 
-  constructor() {
+  constructor(db: Db) {
     this._app = express();
+    this._db = db;
 
     this.setupMiddleware();
     this.setupRouters();
   }
 
-  start(worker: cluster.Worker): void {
+  start(worker: Worker): void {
     this._app.listen(config.port, () => {
       Logger.log(`WORKER ${worker.id} CREATED ON PORT ${config.port}`);
       this.setupRouters();
@@ -37,7 +42,11 @@ export class App {
   }
 
   private setupRouters(): void {
-    HealthRouter.create(this._app);
+    const routerFactories: RouterFactory[] = [
+      new HealthRouterFactory(),
+      new QueueRouterFactory(),
+    ];
+    routerFactories.forEach(routerFactory => routerFactory.create(this._app, this._db));
   }
 
 }

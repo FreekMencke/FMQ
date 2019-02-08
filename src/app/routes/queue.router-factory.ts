@@ -7,21 +7,48 @@ export class QueueRouterFactory implements RouterFactory {
   create(app: Application, db: Db): void {
     const router = Router();
 
-    // this.healthcheck(router, db);
+    this.push(router, db);
+    this.pop(router, db);
+    this.length(router, db);
 
     app.use('/queue', router);
   }
 
-  // private healthcheck(router: express.Router, db: Db): void {
-  //   router.get('/', async (req, res) => {
-  //     try {
-  //       // fetch an item from the queue to make sure db connection is up.
-  //       await db.collection('queue').findOne({});
-  //       res.status(200).send();
-  //     } catch(e) {
-  //       res.status(500).send();
-  //     }
-  //   });
-  // }
+  private push(router: Router, db: Db): void {
+    router.get('/push', (req, res) => {
+      db.collection('queue')
+        .insertOne({ payload: req.body })
+        .then(({ insertedCount }) => res.status(insertedCount > 0 ? 201 : 500).send())
+        .catch(() => res.status(500).send());
+    });
+  }
+
+  private pop(router: Router, db: Db): void {
+    const timeout = new Date();
+    timeout.setSeconds(timeout.getSeconds() + 300); // #TODO: move to config.
+
+    router.get('/pop', (req, res) => {
+      db.collection('queue')
+        .findOneAndUpdate(
+          {
+            $or: [{ timeout: null }, { timeout: { $lte: new Date() } }]
+          },
+          {
+            $set: { timeout },
+            $inc: { tries: 1 }
+          }
+        )
+        .then(({ value }) => res.status(200).json(value))
+        .catch(() => res.status(500).send());
+    });
+  }
+
+  private length(router: Router, db: Db): void {
+    router.get('/length', (req, res) => {
+      db.collection('queue').countDocuments()
+        .then(length => res.status(200).json(length))
+        .catch(() => res.status(500).send());
+    });
+  }
 
 }

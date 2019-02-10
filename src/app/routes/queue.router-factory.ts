@@ -18,7 +18,7 @@ export class QueueRouterFactory implements RouterFactory {
   }
 
   private push(router: Router, db: Db): void {
-    router.post('/push', (req, res) => {
+    router.post('/push', async (req, res) => {
       let insertPromise: Promise<InsertWriteOpResult | InsertOneWriteOpResult>;
       if (req.body instanceof Array) {
         insertPromise = db.collection('queue')
@@ -27,7 +27,7 @@ export class QueueRouterFactory implements RouterFactory {
         insertPromise = db.collection('queue')
           .insertOne({ payload: req.body });
       }
-      insertPromise
+      await insertPromise
         .then(({ insertedCount }) => res.status(insertedCount > 0 ? 201 : 500).send())
         .catch(() => res.status(500).send());
     });
@@ -76,7 +76,7 @@ export class QueueRouterFactory implements RouterFactory {
               $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }]
             },
             {
-              $set: { expiryDate: this.getExpiryDate(req.query.expiresIn)  },
+              $set: { expiryDate: this.getExpiryDate(req.query.expiresIn) },
               $inc: { tries: 1 }
             });
 
@@ -98,8 +98,8 @@ export class QueueRouterFactory implements RouterFactory {
   }
 
   private length(router: Router, db: Db): void {
-    router.get('/length', (req, res) => {
-      db.collection('queue').countDocuments()
+    router.get('/length', async (req, res) => {
+      await db.collection('queue').countDocuments()
         .then(length => res.status(200).json(length))
         .catch(() => res.status(500).send());
     });

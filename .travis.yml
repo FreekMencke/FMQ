@@ -2,9 +2,9 @@ language: node_js
 dist: trusty
 node_js: '10'
 
-cache: npm
+services:
+  - docker
 
 script:
-  - npm run lint
-  - npm run build:ci
+  - npm run build:docker
 

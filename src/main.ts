@@ -3,7 +3,7 @@ import { MongoClient, MongoClientOptions } from 'mongodb';
 import os from 'os';
 import { App } from './app/app';
 import { Logger } from './app/common/logger';
-import { mongoConfig } from './config/mongo.config';
+import { mongoConfig } from './config/mongo-config';
 
 if (cluster.isMaster) {
   Logger.log('TOXMQ ACTIVE - FORKING WORKERS');

@@ -49,7 +49,7 @@ module.exports = env => {
       ),
       new webpack.NormalModuleReplacementPlugin(
         /mongo.config.ts/,
-        env.mode === 'development' ? 'mongo.config.hidden.ts' : 'mongo.config.ts'
+        env.mode === 'development' ? 'mongo-config.dev.ts' : 'mongo-config.ts'
       )
     ],
   };

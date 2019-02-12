@@ -69,12 +69,7 @@ export class QueueRouterFactory implements RouterFactory {
     router.post('/:queue/pop/:amount', async (req, res) => {
       try {
         const items = await db.collection(req.params.queue)
-          .find({
-            $or: [
-              { expiryDate: null },
-              { expiryDate: { $lte: new Date() } }
-            ]
-          })
+          .find({ $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }] })
           .limit(Number(req.params.amount || 1)).toArray();
 
         await db.collection(req.params.queue)
@@ -89,9 +84,7 @@ export class QueueRouterFactory implements RouterFactory {
             });
 
         const results = await db.collection(req.params.queue)
-          .find({
-            _id: { $in: items.map(item => item._id) }
-          })
+          .find({ _id: { $in: items.map(item => item._id) } })
           .limit(Number(req.params.amount || 1)).toArray();
 
         if (results && results.length > 0) {

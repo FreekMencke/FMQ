@@ -16,7 +16,7 @@ export class HealthRouterFactory implements RouterFactory {
     router.get('/', async (req, res) => {
       try {
         // fetch an item from the queue to make sure db connection is up.
-        await db.collection('queue').findOne({});
+        await db.stats();
         res.status(200).send();
       } catch (e) {
         res.status(500).send();

@@ -1,5 +1,5 @@
 import { Application, Router } from 'express';
-import { Db, InsertWriteOpResult, InsertOneWriteOpResult } from 'mongodb';
+import { Db, InsertWriteOpResult, InsertOneWriteOpResult, ObjectId } from 'mongodb';
 import { RouterFactory } from './router.interface';
 
 export class QueueRouterFactory implements RouterFactory {
@@ -9,12 +9,27 @@ export class QueueRouterFactory implements RouterFactory {
   create(app: Application, db: Db): void {
     const router = Router();
 
-    this.push(router, db);
+    this.acknowledge(router, db);
     this.pop(router, db);
     this.popAmount(router, db);
-    this.length(router, db);
+    this.push(router, db);
+    this.size(router, db);
 
     app.use('/queue', router);
+  }
+
+  private acknowledge(router: Router, db: Db): void {
+    router.post('/:queue/ack', async (req, res) => {
+      if (!(req.body instanceof Array)) return res.status(400).send();
+
+      await db.collection(req.params.queue)
+        .deleteMany({
+          _id: { $in: req.body.map(id => ObjectId.createFromHexString(id)) },
+          tries: { $exists: true }
+        })
+        .then(() => res.status(204).send())
+        .catch(() => res.status(500).send());
+    });
   }
 
   private push(router: Router, db: Db): void {
@@ -90,10 +105,10 @@ export class QueueRouterFactory implements RouterFactory {
     });
   }
 
-  private length(router: Router, db: Db): void {
-    router.get('/:queue/length', async (req, res) => {
+  private size(router: Router, db: Db): void {
+    router.get('/:queue/size', async (req, res) => {
       await db.collection(req.params.queue).countDocuments()
-        .then(length => res.status(200).json(length))
+        .then(size => res.status(200).json(size))
         .catch(() => res.status(500).send());
     });
   }

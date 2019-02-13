@@ -1,12 +1,28 @@
 import cluster from 'cluster';
-import { MongoClient, MongoClientOptions } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import os from 'os';
 import { App } from './app/app';
 import { Logger } from './app/common/logger';
+import { Tasks } from './app/tasks/tasks';
 import { mongoConfig } from './config/mongo-config';
+
+const mongoClient = new MongoClient(mongoConfig.url, {
+  auth: {
+    user: mongoConfig.user,
+    password: mongoConfig.password
+  },
+  authMechanism: 'SCRAM-SHA-1',
+  autoReconnect: true,
+  reconnectInterval: 5000,
+  useNewUrlParser: true
+});
 
 if (cluster.isMaster) {
   Logger.log('TOXMQ ACTIVE - FORKING WORKERS');
+
+  mongoClient
+    .connect().then(client => Tasks.init(client.db('tox-mq')))
+    .catch(() => Logger.logError('TASKS MONGO DB CLIENT FAILED.'));
 
   os.cpus().forEach(() => cluster.fork());
 
@@ -15,16 +31,8 @@ if (cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  new MongoClient(mongoConfig.url, <MongoClientOptions>{
-    auth: {
-      user: mongoConfig.user,
-      password: mongoConfig.password
-    },
-    authMechanism: 'SCRAM-SHA-1',
-    autoReconnect: true,
-    reconnectInterval: 5000,
-    useNewUrlParser: true
-  }).connect().then(client => {
-    new App(client.db('tox-mq')).start(cluster.worker);
-  }).catch(() => cluster.worker.kill());
+  mongoClient
+    .connect()
+    .then(client => new App(client.db('tox-mq')).start(cluster.worker))
+    .catch(() => cluster.worker.kill());
 }

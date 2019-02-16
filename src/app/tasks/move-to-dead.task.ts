@@ -1,19 +1,20 @@
 import { Db } from 'mongodb';
 import { CronJob } from 'cron';
 import { Logger } from '../common/logger';
+import { Queue } from '../queue/queue';
 
-export const CleanTaskFactory = (db: Db) =>
-  new CronJob('*/30 * * * * *', () => cleanFactory(db));
+export const MoveToDead = (db: Db) =>
+  new CronJob('*/30 * * * * *', () => moveToDeadFactory(db));
 
-async function cleanFactory(db: Db): Promise<void> {
+async function moveToDeadFactory(db: Db): Promise<void> {
   try {
     (await db.collections())
-      .filter(col => !col.collectionName.endsWith('-dead'))
+      .filter(col => col.collectionName.startsWith(Queue.QUEUE_PREFIX) && !col.collectionName.endsWith('-dead'))
       .forEach(async col => {
         const deadMessages = await col
           .find({
             $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
-            tries: { $gte: 5 }
+            attempts: { $gte: 5 }
           })
           .toArray();
 

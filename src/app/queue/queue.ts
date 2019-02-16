@@ -1,0 +1,130 @@
+import { Collection, Db, ObjectId } from 'mongodb';
+import { v4 as uuidV4 } from 'uuid';
+import { DateUtils as DateUtil } from '../common/date-util';
+import { CommandHistory } from './command-history';
+
+export class Queue {
+
+  static readonly QUEUE_PREFIX = 'queue-';
+
+  static async ackOne(db: Db, queue: string, id: string): Promise<number> {
+    const collection = Queue.collection(db, queue);
+
+    const deletedCount = (await collection.deleteOne({
+      _id: ObjectId.createFromHexString(id),
+      tries: { $exists: true }
+    })).deletedCount;
+
+    return deletedCount || 0;
+  }
+
+  static async ackMany(db: Db, queue: string, ids: string[]): Promise<number> {
+    const collection = Queue.collection(db, queue);
+
+    const deletedCount = (await collection.deleteMany({
+      _id: { $in: ids.map(id => ObjectId.createFromHexString(id)) },
+      tries: { $exists: true }
+    })).deletedCount;
+
+    return deletedCount || 0;
+  }
+
+  static async popOne(db: Db, queue: string, expiresIn?: number): Promise<Object | null> {
+    const collection = Queue.collection(db, queue);
+
+    const result = await collection.findOneAndUpdate(
+      { $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }] },
+      {
+        $set: { expiryDate: DateUtil.getExpiryDate(expiresIn) },
+        $inc: { attempts: 1 }
+      },
+      { returnOriginal: false }
+    );
+
+    return result.value;
+  }
+
+  static async popMany(db: Db, queue: string, amount: number, expiresIn?: number): Promise<Object[] | null> {
+    const collection = Queue.collection(db, queue);
+
+    const uuid = uuidV4();
+    let reservedCount = 0;
+    let ids: string[] = [];
+
+    while (reservedCount < amount) {
+      // Find requested amount of messages without expiryDate or uuid
+      ids = await collection.find({
+        $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
+        uuid: { $exists: false }
+      }).limit(amount).map(doc => doc._id).toArray();
+
+      // If no unassigned messages were found, break out
+      if (ids.length === 0) {
+        break;
+      }
+
+      // Try to reserve the requested amount of messages
+      reservedCount += (await collection.updateMany(
+        {
+          _id: { $in: ids },
+          $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
+          uuid: { $exists: false }
+        },
+        { $set: { uuid } }
+      )).modifiedCount;
+    }
+
+    // Fetch reserved ids
+    const reservedIds = await collection.find({ uuid }).map(doc => doc._id).toArray();
+
+    // Claim messages
+    await collection.updateMany(
+      { _id: { $in: reservedIds } },
+      {
+        $set: { expiryDate: DateUtil.getExpiryDate(expiresIn) },
+        $unset: { uuid },
+        $inc: { attempts: 1 }
+      }
+    );
+
+    // Fetch and return claimed messages
+    return (await collection.find({ _id: { $in: reservedIds } })).toArray();
+  }
+
+  static async pushOne(db: Db, queue: string, payload: Object, hashCode?: string): Promise<number> {
+    const collection = Queue.collection(db, queue);
+
+    if (!await CommandHistory.shouldExecute(db, hashCode)) return 0;
+
+    const insertedCount = await collection
+      .insertOne({ payload })
+      .then(result => result.insertedCount)
+      .catch(() => CommandHistory.clearCommand(db, hashCode).then(() => 0));
+
+    return insertedCount;
+  }
+
+  static async pushMany(db: Db, queue: string, payloads: Object[], hashCode?: string): Promise<number> {
+    const collection = Queue.collection(db, queue);
+
+    if (!await CommandHistory.shouldExecute(db, hashCode)) return 0;
+
+    const insertedCount = await collection
+      .insertMany(payloads.map(payload => ({ payload })), { ordered: false })
+      .then(result => result.insertedCount)
+      .catch(() => CommandHistory.clearCommand(db, hashCode).then(() => 0));
+
+    return insertedCount;
+  }
+
+  static async size(db: Db, queue: string): Promise<number> {
+    const collection = Queue.collection(db, queue);
+
+    return await collection.countDocuments();
+  }
+
+  private static collection(db: Db, queue: string): Collection {
+    return db.collection(Queue.QUEUE_PREFIX + queue);
+  }
+
+}

@@ -1,10 +1,10 @@
 import { Db } from 'mongodb';
-import { CleanTaskFactory } from './clean.task';
+import { MoveToDead } from './move-to-dead.task';
 
 export class Tasks {
 
   static init(db: Db): void {
-    [CleanTaskFactory(db)].forEach(task => task.start());
+    [MoveToDead(db)].forEach(task => task.start());
   }
 
 }

@@ -52,8 +52,8 @@ export class QueueRouterFactory implements RouterFactory {
       try {
         const result =
           req.body instanceof Array
-            ? await MessageQueue.pushMany(db, req.params.queue, req.body, req.query.hashCode)
-            : await MessageQueue.pushOne(db, req.params.queue, req.body, req.query.hashCode);
+            ? await MessageQueue.pushMany(db, req.params.queue, req.body, req.query.hashCode, req.query.expiresIn)
+            : await MessageQueue.pushOne(db, req.params.queue, req.body, req.query.hashCode, req.query.expiresIn);
 
         res.status(result > 0 ? 201 : 204).send();
       } catch (e) {

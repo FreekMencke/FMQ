@@ -2,3 +2,5 @@
 [![GitHub license](https://img.shields.io/github/license/toxsickcoder/node-typescript-starter.svg)](https://github.com/toxsickcoder/node-typescript-starter/blob/master/LICENSE)
 
 # ToxMQ
+
+UNDER CONSTRUCTION

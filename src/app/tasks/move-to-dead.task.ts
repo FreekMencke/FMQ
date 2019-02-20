@@ -23,6 +23,7 @@ async function moveToDeadFactory(db: Db): Promise<void> {
         await col.deleteMany({ _id: { $in: deadMessages.map(msg => msg._id) } });
       });
   } catch (e) {
-    Logger.logTask('CLEAN_TASK', 'FAILED TO PERFORM CLEAN_TASK\n', e);
+    Logger.logTaskError('CLEAR_COMMAND_HISTORY', 'FAILED TO PERFORM CLEAR_COMMAND_HISTORY\n', e);
+    Logger.logTask('MOVE_TO_DEAD', 'FAILED TO PERFORM MOVE_TO_DEAD\n', e);
   }
 }

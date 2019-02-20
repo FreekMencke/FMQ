@@ -1,17 +1,18 @@
 import { Collection, Db } from 'mongodb';
+import { DateUtils } from '../common/date-util';
 
 export class CommandHistory {
-  private static readonly COMMAND_HISTORY_COLLECTION = 'command-history';
+  public static readonly COMMAND_HISTORY_COLLECTION = 'command-history';
 
   static commandHistory(db: Db): Collection {
     return db.collection(CommandHistory.COMMAND_HISTORY_COLLECTION);
   }
 
-  static async shouldExecute(db: Db, hashCode?: string): Promise<boolean> {
+  static async shouldExecute(db: Db, hashCode?: string, expiresIn?: number): Promise<boolean> {
     if (!!hashCode) {
       const commandUpdate = await CommandHistory.commandHistory(db).findOneAndUpdate(
         { hashCode },
-        { $set: { hashCode }, $inc: { attempts: 1 } },
+        { $set: { hashCode, expiryDate: DateUtils.getExpiryDate(expiresIn) }, $inc: { attempts: 1 } },
         { upsert: true }
       );
 

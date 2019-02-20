@@ -124,10 +124,10 @@ export class MessageQueue {
     return (await collection.find({ _id: { $in: reservedIds } })).toArray();
   }
 
-  static async pushOne(db: Db, queue: string, payload: Object, hashCode?: string): Promise<number> {
+  static async pushOne(db: Db, queue: string, payload: Object, hashCode?: string, expiresIn?: number): Promise<number> {
     const collection = MessageQueue.collection(db, queue);
 
-    if (!(await CommandHistory.shouldExecute(db, hashCode))) return 0;
+    if (!(await CommandHistory.shouldExecute(db, hashCode, expiresIn))) return 0;
 
     const insertedCount = await collection
       .insertOne({ payload })
@@ -137,10 +137,16 @@ export class MessageQueue {
     return insertedCount;
   }
 
-  static async pushMany(db: Db, queue: string, payloads: Object[], hashCode?: string): Promise<number> {
+  static async pushMany(
+    db: Db,
+    queue: string,
+    payloads: Object[],
+    hashCode?: string,
+    expiresIn?: number
+  ): Promise<number> {
     const collection = MessageQueue.collection(db, queue);
 
-    if (!(await CommandHistory.shouldExecute(db, hashCode))) return 0;
+    if (!(await CommandHistory.shouldExecute(db, hashCode, expiresIn))) return 0;
 
     const insertedCount = await collection
       .insertMany(payloads.map(payload => ({ payload })), { ordered: false })

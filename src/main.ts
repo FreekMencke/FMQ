@@ -9,19 +9,20 @@ import { mongoConfig } from './config/mongo-config';
 const mongoClient = new MongoClient(mongoConfig.url, {
   auth: {
     user: mongoConfig.user,
-    password: mongoConfig.password
+    password: mongoConfig.password,
   },
   authMechanism: 'SCRAM-SHA-1',
   autoReconnect: true,
   reconnectInterval: 5000,
-  useNewUrlParser: true
+  useNewUrlParser: true,
 });
 
 if (cluster.isMaster) {
   Logger.log('TOXMQ ACTIVE - FORKING WORKERS');
 
   mongoClient
-    .connect().then(client => Tasks.init(client.db('tox-mq')))
+    .connect()
+    .then(client => Tasks.init(client.db('tox-mq')))
     .catch(() => Logger.logError('TASKS MONGO DB CLIENT FAILED.'));
 
   os.cpus().forEach(() => cluster.fork());

@@ -1,7 +1,6 @@
 import { Collection, Db } from 'mongodb';
 
 export class CommandHistory {
-
   private static readonly COMMAND_HISTORY_COLLECTION = 'command-history';
 
   static commandHistory(db: Db): Collection {
@@ -10,8 +9,11 @@ export class CommandHistory {
 
   static async shouldExecute(db: Db, hashCode?: string): Promise<boolean> {
     if (!!hashCode) {
-      const commandUpdate = await CommandHistory.commandHistory(db)
-        .findOneAndUpdate({ hashCode }, { $set: { hashCode }, $inc: { attempts: 1 } }, { upsert: true });
+      const commandUpdate = await CommandHistory.commandHistory(db).findOneAndUpdate(
+        { hashCode },
+        { $set: { hashCode }, $inc: { attempts: 1 } },
+        { upsert: true }
+      );
 
       return !commandUpdate.value;
     }
@@ -23,5 +25,4 @@ export class CommandHistory {
       await CommandHistory.commandHistory(db).deleteOne({ hashCode });
     }
   }
-
 }

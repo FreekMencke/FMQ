@@ -3,40 +3,66 @@ import { v4 as uuidV4 } from 'uuid';
 import { DateUtils as DateUtil } from '../common/date-util';
 import { CommandHistory } from './command-history';
 
-export class Queue {
-
+export class MessageQueue {
   static readonly QUEUE_PREFIX = 'queue-';
 
   static async ackOne(db: Db, queue: string, id: string): Promise<number> {
-    const collection = Queue.collection(db, queue);
+    const collection = MessageQueue.collection(db, queue);
 
     const deletedCount = (await collection.deleteOne({
       _id: ObjectId.createFromHexString(id),
-      tries: { $exists: true }
+      tries: { $exists: true },
     })).deletedCount;
 
     return deletedCount || 0;
   }
 
   static async ackMany(db: Db, queue: string, ids: string[]): Promise<number> {
-    const collection = Queue.collection(db, queue);
+    const collection = MessageQueue.collection(db, queue);
 
     const deletedCount = (await collection.deleteMany({
       _id: { $in: ids.map(id => ObjectId.createFromHexString(id)) },
-      tries: { $exists: true }
+      tries: { $exists: true },
     })).deletedCount;
 
     return deletedCount || 0;
   }
 
+  static async pingOne(db: Db, queue: string, id: string, expiresIn?: number): Promise<Date | null> {
+    const collection = MessageQueue.collection(db, queue);
+
+    const newExpiryDate = DateUtil.getExpiryDate(expiresIn);
+
+    const updated = await collection.findOneAndUpdate(
+      { _id: ObjectId.createFromHexString(id) },
+      { expiryDate: newExpiryDate },
+      { returnOriginal: true }
+    );
+
+    return updated.value ? newExpiryDate : null;
+  }
+
+  static async pingMany(db: Db, queue: string, ids: string[], expiresIn?: number): Promise<Date | null> {
+    const collection = MessageQueue.collection(db, queue);
+
+    const newExpiryDate = DateUtil.getExpiryDate(expiresIn);
+
+    const updated = await collection.updateMany(
+      { _id: { $in: ids.map(id => ObjectId.createFromHexString(id)) } },
+      { expiryDate: newExpiryDate }
+    );
+
+    return updated.modifiedCount > 0 ? newExpiryDate : null;
+  }
+
   static async popOne(db: Db, queue: string, expiresIn?: number): Promise<Object | null> {
-    const collection = Queue.collection(db, queue);
+    const collection = MessageQueue.collection(db, queue);
 
     const result = await collection.findOneAndUpdate(
       { $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }] },
       {
         $set: { expiryDate: DateUtil.getExpiryDate(expiresIn) },
-        $inc: { attempts: 1 }
+        $inc: { attempts: 1 },
       },
       { returnOriginal: false }
     );
@@ -45,7 +71,7 @@ export class Queue {
   }
 
   static async popMany(db: Db, queue: string, amount: number, expiresIn?: number): Promise<Object[] | null> {
-    const collection = Queue.collection(db, queue);
+    const collection = MessageQueue.collection(db, queue);
 
     const uuid = uuidV4();
     let reservedCount = 0;
@@ -53,10 +79,14 @@ export class Queue {
 
     while (reservedCount < amount) {
       // Find requested amount of messages without expiryDate or uuid
-      ids = await collection.find({
-        $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
-        uuid: { $exists: false }
-      }).limit(amount).map(doc => doc._id).toArray();
+      ids = await collection
+        .find({
+          $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
+          uuid: { $exists: false },
+        })
+        .limit(amount)
+        .map(doc => doc._id)
+        .toArray();
 
       // If no unassigned messages were found, break out
       if (ids.length === 0) {
@@ -68,14 +98,17 @@ export class Queue {
         {
           _id: { $in: ids },
           $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
-          uuid: { $exists: false }
+          uuid: { $exists: false },
         },
         { $set: { uuid } }
       )).modifiedCount;
     }
 
     // Fetch reserved ids
-    const reservedIds = await collection.find({ uuid }).map(doc => doc._id).toArray();
+    const reservedIds = await collection
+      .find({ uuid })
+      .map(doc => doc._id)
+      .toArray();
 
     // Claim messages
     await collection.updateMany(
@@ -83,7 +116,7 @@ export class Queue {
       {
         $set: { expiryDate: DateUtil.getExpiryDate(expiresIn) },
         $unset: { uuid },
-        $inc: { attempts: 1 }
+        $inc: { attempts: 1 },
       }
     );
 
@@ -92,9 +125,9 @@ export class Queue {
   }
 
   static async pushOne(db: Db, queue: string, payload: Object, hashCode?: string): Promise<number> {
-    const collection = Queue.collection(db, queue);
+    const collection = MessageQueue.collection(db, queue);
 
-    if (!await CommandHistory.shouldExecute(db, hashCode)) return 0;
+    if (!(await CommandHistory.shouldExecute(db, hashCode))) return 0;
 
     const insertedCount = await collection
       .insertOne({ payload })
@@ -105,9 +138,9 @@ export class Queue {
   }
 
   static async pushMany(db: Db, queue: string, payloads: Object[], hashCode?: string): Promise<number> {
-    const collection = Queue.collection(db, queue);
+    const collection = MessageQueue.collection(db, queue);
 
-    if (!await CommandHistory.shouldExecute(db, hashCode)) return 0;
+    if (!(await CommandHistory.shouldExecute(db, hashCode))) return 0;
 
     const insertedCount = await collection
       .insertMany(payloads.map(payload => ({ payload })), { ordered: false })
@@ -118,13 +151,12 @@ export class Queue {
   }
 
   static async size(db: Db, queue: string): Promise<number> {
-    const collection = Queue.collection(db, queue);
+    const collection = MessageQueue.collection(db, queue);
 
     return await collection.countDocuments();
   }
 
   private static collection(db: Db, queue: string): Collection {
-    return db.collection(Queue.QUEUE_PREFIX + queue);
+    return db.collection(MessageQueue.QUEUE_PREFIX + queue);
   }
-
 }

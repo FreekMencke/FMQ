@@ -3,7 +3,6 @@ import { Db } from 'mongodb';
 import { RouterFactory } from './router.interface';
 
 export class HealthRouterFactory implements RouterFactory {
-
   create(app: Application, db: Db): void {
     const router = Router();
 
@@ -23,5 +22,4 @@ export class HealthRouterFactory implements RouterFactory {
       }
     });
   }
-
 }

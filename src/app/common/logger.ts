@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 
 export class Logger {
-
   static log(...message: any[]): void {
     console.log(`[${Logger.getFormattedTime()}]`, ...message);
   }
@@ -40,12 +39,11 @@ export class Logger {
       minute: '2-digit',
       second: '2-digit',
       hour12: false,
-      timeZone: 'UTC'
+      timeZone: 'UTC',
     };
     const date = new Date();
     const timeString = date.toLocaleTimeString('en-US', options);
     const dateString = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
     return includeDate ? `${dateString} ${timeString}` : timeString;
   }
-
 }

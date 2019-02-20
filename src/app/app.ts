@@ -12,7 +12,6 @@ import { QueueRouterFactory } from './routes/queue.router-factory';
 import { RouterFactory } from './routes/router.interface';
 
 export class App {
-
   private _app: Application;
   private _db: Db;
 
@@ -34,19 +33,17 @@ export class App {
   private setupMiddleware(): void {
     this._app.use(compression());
     this._app.use(helmet());
-    this._app.use(cors({
-      origin: (origin, callback) => callback(null, config.allowedOrigins.includes(origin))
-    }));
+    this._app.use(
+      cors({
+        origin: (origin, callback) => callback(null, config.allowedOrigins.includes(origin)),
+      })
+    );
     this._app.use(bodyParser.urlencoded({ extended: true }));
     this._app.use(bodyParser.json());
   }
 
   private setupRouters(): void {
-    const routerFactories: RouterFactory[] = [
-      new HealthRouterFactory(),
-      new QueueRouterFactory(),
-    ];
+    const routerFactories: RouterFactory[] = [new HealthRouterFactory(), new QueueRouterFactory()];
     routerFactories.forEach(routerFactory => routerFactory.create(this._app, this._db));
   }
-
 }

@@ -32,7 +32,7 @@ export class QueueRouterFactory implements RouterFactory {
   }
 
   private ping(router: Router, db: Db): void {
-    router.post('/:queue/push', async (req, res) => {
+    router.post('/:queue/ping', async (req, res) => {
       try {
         const result =
           req.body instanceof Array

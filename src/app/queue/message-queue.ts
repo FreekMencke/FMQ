@@ -6,24 +6,15 @@ import { CommandHistory } from './command-history';
 export class MessageQueue {
   static readonly QUEUE_PREFIX = 'queue-';
 
-  static async ackOne(db: Db, queue: string, id: string): Promise<number> {
-    const collection = MessageQueue.collection(db, queue);
-
-    const deletedCount = (await collection.deleteOne({
-      _id: ObjectId.createFromHexString(id),
-      tries: { $exists: true },
-    })).deletedCount;
-
-    return deletedCount || 0;
-  }
-
   static async ackMany(db: Db, queue: string, ids: string[]): Promise<number> {
     const collection = MessageQueue.collection(db, queue);
 
-    const deletedCount = (await collection.deleteMany({
-      _id: { $in: ids.map(id => ObjectId.createFromHexString(id)) },
-      tries: { $exists: true },
-    })).deletedCount;
+    const deletedCount = await collection
+      .deleteMany({
+        _id: { $in: ids.map(id => ObjectId.createFromHexString(id)) },
+        attempts: { $exists: true },
+      })
+      .then(res => res.deletedCount);
 
     return deletedCount || 0;
   }

@@ -20,9 +20,7 @@ export class QueueRouterFactory implements RouterFactory {
   private acknowledge(router: Router, db: Db): void {
     router.post('/:queue/ack', async (req, res) => {
       try {
-        req.body instanceof Array
-          ? await MessageQueue.ackMany(db, req.params.queue, req.body)
-          : await MessageQueue.ackOne(db, req.params.queue, req.body);
+        await MessageQueue.ackMany(db, req.params.queue, req.body);
 
         res.status(204).send();
       } catch (e) {

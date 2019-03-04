@@ -98,6 +98,7 @@ export class MessageQueue {
     // Fetch reserved ids
     const reservedIds = await collection
       .find({ uuid })
+      .limit(amount)
       .map(doc => doc._id)
       .toArray();
 
@@ -110,6 +111,9 @@ export class MessageQueue {
         $inc: { attempts: 1 },
       }
     );
+
+    // Unclaim overload
+    await collection.updateMany({ uuid }, { $unset: { uuid } });
 
     // Fetch and return claimed messages
     return (await collection.find({ _id: { $in: reservedIds } })).toArray();

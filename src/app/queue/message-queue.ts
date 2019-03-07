@@ -19,20 +19,6 @@ export class MessageQueue {
     return deletedCount || 0;
   }
 
-  static async pingOne(db: Db, queue: string, id: string, expiresIn?: number): Promise<Date | null> {
-    const collection = MessageQueue.collection(db, queue);
-
-    const newExpiryDate = DateUtil.getExpiryDate(expiresIn);
-
-    const updated = await collection.findOneAndUpdate(
-      { _id: ObjectId.createFromHexString(id) },
-      { expiryDate: newExpiryDate },
-      { returnOriginal: true }
-    );
-
-    return updated.value ? newExpiryDate : null;
-  }
-
   static async pingMany(db: Db, queue: string, ids: string[], expiresIn?: number): Promise<Date | null> {
     const collection = MessageQueue.collection(db, queue);
 

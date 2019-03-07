@@ -32,10 +32,7 @@ export class QueueRouterFactory implements RouterFactory {
   private ping(router: Router, db: Db): void {
     router.post('/:queue/ping', async (req, res) => {
       try {
-        const result =
-          req.body instanceof Array
-            ? await MessageQueue.pingMany(db, req.params.queue, req.body, req.query.expiresIn)
-            : await MessageQueue.pingOne(db, req.params.queue, req.body, req.query.expiresIn);
+        const result = await MessageQueue.pingMany(db, req.params.queue, req.body, req.query.expiresIn);
 
         if (result) res.status(200).send({ expiryDate: result });
         else res.status(500).send();

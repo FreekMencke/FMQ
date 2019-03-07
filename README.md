@@ -117,7 +117,7 @@ Returns:
 
 ### PushOne
 
-Endpoint: `POST /queue/queueName/pop`
+Endpoint: `POST /queue/queueName/pop(?hashCode=[string])(&expiresIn=[number])`
 
 Possible status codes: `201`, `204` and `500`.
 
@@ -129,7 +129,7 @@ Expected payload:
 
 ### PushMany
 
-Endpoint: `POST /queue/queueName/pop`
+Endpoint: `POST /queue/queueName/pop(?hashCode=[string])(&expiresIn=[number])`
 
 Possible status codes: `201`, `204` and `500`.
 

@@ -3,27 +3,28 @@
 
 # ToxMQ
 
-I needed a simple queuing system for some projects so I decided to write my own MQ. I just needed basic functionality and didn't want too much overhead. It exposes itself with an API written in Express and persists itself using a Mongo database.
+ToxMQ is a simple message queuing system with little overhead.
+It is exposed through an Express API and preserved through a Mongo database.
 
 ToxMQ is multithread and replica safe.
 
 ## Getting started
 
-To get started with ToxMQ you can either clone this repository and build/run it yourself, or you can pull the [Docker container](https://cloud.docker.com/u/toxsickcoder/repository/docker/toxsickcoder/tox-mq) from Docker hub.
+Either clone and build this repository, or pull the [Docker container](https://cloud.docker.com/u/toxsickcoder/repository/docker/toxsickcoder/tox-mq) from Docker hub.
 
 ### Docker
 
 `docker pull toxsickcoder/tox-mq:latest`
 
-To run the ToxMQ from the container, we need to provide the details to connect with the Mongo DB. We can either provide this as an environment variable **or** a secret (recommended). If both are provided, the environment variables will be prioritized.
+To run ToxMQ from a container, provide the Mongo DB connection details. The connection details can be provided as a secret (**recommended**) or an environment variable. If both sources are provided, the environment variables will be prioritized.
 
-The container runs on port 8080, but you can map it to whatever you want with docker.
+The container runs on port 8080, but can mapped to any port with docker.
 
 #### Docker environment variables
 
-- **MONGO_USER**: The username used to connect with your Mongo DB.
-- **MONGO_PASSWORD**: The password used to connect with your Mongo DB.
-- **MONGO_URL**: The url used to connect with your Mongo DB (mongodb://...).
+- **MONGO_USER**: The username used to connect to the Mongo DB.
+- **MONGO_PASSWORD**: The password used to connect to the Mongo DB.
+- **MONGO_URL**: The url used to connect to the Mongo DB (mongodb://...).
 
 #### Docker secret
 
@@ -37,7 +38,7 @@ The container runs on port 8080, but you can map it to whatever you want with do
 
 ## Concepts
 
-ToxMQ uses basic MQ concepts with a few extras. The actions you can perform on a queue are:
+ToxMQ uses basic MQ concepts with a few extra features. The available actions are:
 
 - [AckMany](#ackmany)
 - [PingMany](#pingmany)
@@ -47,13 +48,14 @@ ToxMQ uses basic MQ concepts with a few extras. The actions you can perform on a
 - [PushMany](#pushmany)
 - [Size](#size)
 
-It also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and thus ignored. You can use the Command history by sending a unique hash and a duration during which this duplicate shouldn't be added to the queue (default 300 seconds).
+ToxMQ also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and can therefor be ignored. Command history is used by sending a unique hash and a duration during which duplicate messages shouldn't be added to the queue (default 300 seconds).
 
 All actions are **safe to be called simultaniously**, which makes ToxMQ perfect to use with docker replicas for example.
 
 ## Queues
 
-You can use as many queues as you want, there is no limit. All requests to perform actions on a queue have to start with `/queue/:queueName`. For example, we could check the size of the `test` queue by performing `GET /queue/test/size`.
+Any number of queues can be used simultaneously. 
+All requests to perform actions on a queue have to start with `/queue/:queueName`. For example, we could check the size of the `test` queue by performing `GET /queue/test/size`.
 
 ## API
 

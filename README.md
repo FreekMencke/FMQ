@@ -144,7 +144,7 @@ Returns:
 
 > TODO explanation
 
-Endpoint: `POST /queue/queueName/pop(?hashCode=[string])(&expiresIn=[number])`
+Endpoint: `POST /queue/queueName/push(?hashCode=[string])(&expiresIn=[number])`
 
 Possible status codes: `201`, `204` and `500`.
 
@@ -158,7 +158,7 @@ Expected payload:
 
 > TODO explanation
 
-Endpoint: `POST /queue/queueName/pop(?hashCode=[string])(&expiresIn=[number])`
+Endpoint: `POST /queue/queueName/push(?hashCode=[string])(&expiresIn=[number])`
 
 Possible status codes: `201`, `204` and `500`.
 

@@ -38,6 +38,8 @@ The container runs on port 8080, but can mapped to any port with docker.
 
 ## Concepts
 
+### Actions
+
 ToxMQ uses basic MQ concepts with a few extra features. The available actions are:
 
 - [AckMany](#ackmany)
@@ -48,9 +50,21 @@ ToxMQ uses basic MQ concepts with a few extra features. The available actions ar
 - [PushMany](#pushmany)
 - [Size](#size)
 
-ToxMQ also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and can therefor be ignored. Command history is used by sending a unique hash and a duration during which duplicate messages shouldn't be added to the queue (default 300 seconds).
+### Multi threading and replicating
 
 All actions are **safe to be called simultaniously**, which makes ToxMQ perfect to use with docker replicas for example.
+
+### Command History
+
+ToxMQ also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and can therefor be ignored. Command history is used by sending a unique hash and a duration during which duplicate messages shouldn't be added to the queue (default 300 seconds).
+
+### Dead queue
+
+Some messages might not be able to complete successfully. To prevent the message from being permanently in the queue there is the **dead queue** system. After a messages has had 5 unsuccessful attempts, the message will be move to a dead queue. A dead queue is a queue with the same name as the normal queue, appended with `-dead`. 
+
+For example we have a `player-hiscore-scraper` queue we use to push players to we want to have scraped. Somehow a non-existing username gets pushed and it fails 5 times. The user then gets moved to the `player-hiscore-scraper-dead` queue.
+
+This allows us to easily see which messages failed. We could implement a system which will notify us when a message would fail to process.
 
 ## Queues
 
@@ -60,6 +74,8 @@ All requests to perform actions on a queue have to start with `/queue/:queueName
 ## API
 
 ### AckMany
+
+After we processed messages successfully, we use this endpoint to remove the messages from the queue. This is important, otherwise after the expiry time of message has passed the message will be available again on the queue.
 
 Endpoint: `POST /queue/:queueName/ack`
 
@@ -73,6 +89,9 @@ id: string[]
 
 ### PingMany
 
+When processing messages might take longer than the `expiresIn` property (standard 300s), we can use this endpoint to extend the time we have to process the message. We can use the optional `expiresIn` query parameter to choose how long we want to extend the messages (standard 300s). 
+If we don't and we pass the expiry date, the message will become available again on the queue before we can [AckMany](#ackmany) it.
+
 Endpoint: `POST /queue/:queueName/ping(?expiresIn=[number])`
 
 Possible status codes: `200` and `500`.
@@ -84,6 +103,8 @@ id: string[]
 ```
 
 ### PopOne
+
+We can call this method to retrieve a message from a certain queue. We can use the optional `expiresIn` parameter (standard 300s). After the `expiresIn` time has passed without an [AckMany](#ackmany) call, we assume the message failed to process and it will become available on the queue again, unless we [PingMany](#pingmany) it.
 
 Endpoint: `POST /queue/:queueName/pop(?expiresIn=[number])`
 
@@ -102,6 +123,8 @@ Returns:
 
 ### PopMany
 
+We can call this method to retrieve multiple messages from a certain queue. The `amount` route parameter is used to choose the amount of messages to pop. We can use the optional `expiresIn` parameter (standard 300s). After the `expiresIn` time has passed without an [AckMany](#ackmany) call, we assume the message failed to process and it will become available on the queue again, unless we [PingMany](#pingmany) it.
+
 Endpoint: `POST /queue/:queueName/pop/:amount(?expiresIn=[number])`
 
 Possible status codes: `200`, `204` and `500`.
@@ -119,6 +142,8 @@ Returns:
 
 ### PushOne
 
+> TODO explanation
+
 Endpoint: `POST /queue/queueName/pop(?hashCode=[string])(&expiresIn=[number])`
 
 Possible status codes: `201`, `204` and `500`.
@@ -131,6 +156,8 @@ Expected payload:
 
 ### PushMany
 
+> TODO explanation
+
 Endpoint: `POST /queue/queueName/pop(?hashCode=[string])(&expiresIn=[number])`
 
 Possible status codes: `201`, `204` and `500`.
@@ -142,6 +169,8 @@ Expected payload:
 ```
 
 ### Size
+
+We can use this endpoint to check howmany messages are left on a certain queue.
 
 Endpoint: `GET /queue/:queueName/size`
 

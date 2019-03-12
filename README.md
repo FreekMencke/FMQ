@@ -46,8 +46,7 @@ ToxMQ uses basic MQ concepts with a few extra features. The available actions ar
 - [PingMany](#pingmany)
 - [PopOne](#popone)
 - [PopMany](#popmany)
-- [PushOne](#pushone)
-- [PushMany](#pushmany)
+- [Push](#push)
 - [Size](#size)
 
 ### Multi threading and replicating
@@ -60,7 +59,7 @@ ToxMQ also utilizes a concept called **Command history**. Command history can be
 
 ### Dead queue
 
-Some messages might not be able to complete successfully. To prevent the message from being permanently in the queue there is the **dead queue** system. After a messages has had 5 unsuccessful attempts, the message will be move to a dead queue. A dead queue is a queue with the same name as the normal queue, appended with `-dead`. 
+Some messages might not be able to complete successfully. To prevent the message from being permanently in the queue there is the **dead queue** system. After a messages has had 5 unsuccessful attempts, the message will be move to a dead queue. A dead queue is a queue with the same name as the normal queue, appended with `-dead`.
 
 For example we have a `player-hiscore-scraper` queue we use to push players to we want to have scraped. Somehow a non-existing username gets pushed and it fails 5 times. The user then gets moved to the `player-hiscore-scraper-dead` queue.
 
@@ -68,7 +67,7 @@ This allows us to easily see which messages failed. We could implement a system 
 
 ## Queues
 
-Any number of queues can be used simultaneously. 
+Any number of queues can be used simultaneously.
 All requests to perform actions on a queue have to start with `/queue/:queueName`. For example, we could check the size of the `test` queue by performing `GET /queue/test/size`.
 
 ## API
@@ -89,7 +88,7 @@ id: string[]
 
 ### PingMany
 
-When processing messages might take longer than the `expiresIn` property (standard 300s), we can use this endpoint to extend the time we have to process the message. We can use the optional `expiresIn` query parameter to choose how long we want to extend the messages (standard 300s). 
+When processing messages might take longer than the `expiresIn` property (standard 300s), we can use this endpoint to extend the time we have to process the message. We can use the optional `expiresIn` query parameter to choose how long we want to extend the messages (standard 300s).
 If we don't and we pass the expiry date, the message will become available again on the queue before we can [AckMany](#ackmany) it.
 
 Endpoint: `POST /queue/:queueName/ping(?expiresIn=[number])`
@@ -140,9 +139,13 @@ Returns:
 }, ...]
 ```
 
-### PushOne
+### Push
 
-> TODO explanation
+The push method is used to put a new message on the queue. This call accepts an object (PushOne) or an array (PushMany).
+
+To make sure that multiple docker containers trying to push the same message simultaniously will only add 1 message to the queue, we can use the optional `hashCode` parameter. The `hashCode` parameter will add this command to the [Command History](#command-history).
+
+The hashCode should be a hash of your payload (you can add more values like dates to make it more unique). We can use the optional `expiresIn` parameter (standard 300s) to decide how long this command will be in the [Command History](#command-history). While there is a hash already in the history, any attempt to push the message will be ignored.
 
 Endpoint: `POST /queue/queueName/push(?hashCode=[string])(&expiresIn=[number])`
 
@@ -151,20 +154,10 @@ Possible status codes: `201`, `204` and `500`.
 Expected payload:
 
 ```ts
+One:
 {}: any
-```
 
-### PushMany
-
-> TODO explanation
-
-Endpoint: `POST /queue/queueName/push(?hashCode=[string])(&expiresIn=[number])`
-
-Possible status codes: `201`, `204` and `500`.
-
-Expected payload:
-
-```ts
+Many:
 [{}, ...]: any[]
 ```
 

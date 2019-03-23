@@ -13,6 +13,6 @@ async function moveToDeadFactory(db: Db): Promise<void> {
       expiryDate: { $lte: new Date() },
     });
   } catch (e) {
-    Logger.logTaskError('CLEAR_COMMAND_HISTORY', 'FAILED TO PERFORM CLEAR_COMMAND_HISTORY\n', e);
+    Logger.logTask('CLEAR_COMMAND_HISTORY', 'FAILED TO PERFORM CLEAR_COMMAND_HISTORY\n', e);
   }
 }

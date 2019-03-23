@@ -20,11 +20,6 @@ const mongoClient = new MongoClient(mongoConfig.url, {
 if (cluster.isMaster) {
   Logger.log('TOXMQ ACTIVE - FORKING WORKERS');
 
-  mongoClient
-    .connect()
-    .then(client => Tasks.init(client.db('tox-mq')))
-    .catch(() => Logger.logError('TASKS MONGO DB CLIENT FAILED.'));
-
   os.cpus().forEach(() => cluster.fork());
 
   cluster.on('exit', worker => {
@@ -34,6 +29,9 @@ if (cluster.isMaster) {
 } else {
   mongoClient
     .connect()
-    .then(client => new App(client.db('tox-mq')).start(cluster.worker))
+    .then(client => {
+      new App(client.db('tox-mq')).start(cluster.worker);
+      Tasks.start(client.db('tox-mq'));
+    })
     .catch(() => cluster.worker.kill());
 }

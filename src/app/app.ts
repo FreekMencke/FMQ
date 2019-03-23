@@ -32,7 +32,7 @@ export class App {
 
   private setupMiddleware(): void {
     this._app.use(compression());
-    this._app.use(helmet());
+    this._app.use(helmet({ noCache: true }));
     this._app.use(
       cors({
         origin: (origin, callback) => callback(null, config.allowedOrigins.includes(origin)),

@@ -6,5 +6,4 @@ services:
   - docker
 
 script:
-  - docker build --rm -t toxsickcoder/tox-mq:latest .
-
+  - docker build --rm -t toxsickcoder/tox-mq:dev .

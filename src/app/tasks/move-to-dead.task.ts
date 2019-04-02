@@ -1,5 +1,6 @@
 import { CronJob } from 'cron';
 import { Db } from 'mongodb';
+import { v4 as uuidV4 } from 'uuid';
 import { Logger } from '../common/logger';
 import { MessageQueue } from '../queue/message-queue';
 
@@ -10,16 +11,36 @@ async function moveToDeadFactory(db: Db): Promise<void> {
     (await db.collections())
       .filter(col => col.collectionName.startsWith(MessageQueue.QUEUE_PREFIX) && !col.collectionName.endsWith('-dead'))
       .forEach(async col => {
-        const deadMessages = await col
-          .find({
+        const uuid = uuidV4();
+
+        await col.updateMany(
+          {
             $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
             attempts: { $gte: 5 },
-          })
-          .toArray();
+            dead: { $exists: false },
+          },
+          {
+            $set: {
+              uuid,
+              dead: true,
+            },
+          }
+        );
+
+        const deadMessages = await col.find({ uuid }).toArray();
 
         if (deadMessages.length === 0) return;
 
-        await db.collection(col.collectionName + '-dead').insertMany(deadMessages);
+        const bulkOp = db.collection(col.collectionName + '-dead').initializeUnorderedBulkOp();
+
+        deadMessages.forEach(({ payload }) =>
+          bulkOp
+            .find({ payload })
+            .upsert()
+            .update({ $set: { payload }, $inc: { attempts: 1 } })
+        );
+
+        await bulkOp.execute();
         await col.deleteMany({ _id: { $in: deadMessages.map(msg => msg._id) } });
       });
   } catch (e) {

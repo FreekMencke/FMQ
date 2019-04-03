@@ -43,6 +43,7 @@ The container runs on port 8080, but can mapped to any port with docker.
 ToxMQ uses basic MQ concepts with a few extra features. The available actions are:
 
 - [AckMany](#ackmany)
+- [Peek](#peek)
 - [PingMany](#pingmany)
 - [PopOne](#popone)
 - [PopMany](#popmany)
@@ -86,9 +87,28 @@ Expected payload:
 id: string[]
 ```
 
+### Peek
+
+We can look at the messages in a queue using this endpoint. We can use the `filter` parameter to pass a json with [Mongo query operators](https://docs.mongodb.com/manual/reference/operator/) to look for specific messages. We can also use the `amount` and `offset` parameters to further customize our results.
+
+Endpoint: `GET /queue/:queueName/peek(?filter=[json])(&amount=[number])(&offset=[number])`
+
+Possible status codes: `200`, `204` and `500`.
+
+Returns:
+
+```ts
+[{
+  "_id": string,
+  "payload": any,
+  "attempts"?: number,
+  "expiryDate"?: Date
+},...]
+```
+
 ### PingMany
 
-When processing messages might take longer than the `expiresIn` property (standard 300s), we can use this endpoint to extend the time we have to process the message. We can use the optional `expiresIn` query parameter to choose how long we want to extend the messages (standard 300s).
+When processing messages might take longer than the `expiresIn` parameter (standard 300s), we can use this endpoint to extend the time we have to process the message. We can use the optional `expiresIn` query parameter to choose how long we want to extend the messages (standard 300s).
 If we don't and we pass the expiry date, the message will become available again on the queue before we can [AckMany](#ackmany) it.
 
 Endpoint: `POST /queue/:queueName/ping(?expiresIn=[number])`

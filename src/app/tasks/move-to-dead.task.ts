@@ -2,14 +2,14 @@ import { CronJob } from 'cron';
 import { Db } from 'mongodb';
 import { v4 as uuidV4 } from 'uuid';
 import { Logger } from '../common/logger';
-import { MessageQueue } from '../queue/message-queue';
+import { MongoUtils } from '../common/utils/mongo-utils';
 
 export const MoveToDead = (db: Db) => new CronJob('*/30 * * * * *', () => moveToDeadFactory(db));
 
 async function moveToDeadFactory(db: Db): Promise<void> {
   try {
     (await db.collections())
-      .filter(col => col.collectionName.startsWith(MessageQueue.QUEUE_PREFIX) && !col.collectionName.endsWith('-dead'))
+      .filter(col => col.collectionName.startsWith(MongoUtils.QUEUE_PREFIX) && !col.collectionName.endsWith('-dead'))
       .forEach(async col => {
         const uuid = uuidV4();
 

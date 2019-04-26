@@ -1,7 +1,13 @@
-Dockerfile
-node_modules
-dist
+*.hidden.*
+
+.vscode/
+node_modules/
+scripts/
+dist/
+
 .editorconfig
 .gitignore
 .travis.yml
-*.hidden.*
+Dockerfile
+LICENSE
+README.md

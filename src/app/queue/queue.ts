@@ -46,7 +46,10 @@ export class Queue {
     const collection = MongoUtils.collection(db, queue);
 
     const result = await collection.findOneAndUpdate(
-      { $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }] },
+      {
+        expiryDate: { $not: { $gt: new Date() } },
+        attempts: { $not: { $gte: 5 } },
+      },
       {
         $set: { expiryDate: DateUtils.getExpiryDate(expiresIn) },
         $inc: { attempts: 1 },
@@ -61,7 +64,10 @@ export class Queue {
     const collection = MongoUtils.collection(db, queue);
 
     return MongoUtils.findAndUpdateMany(
-      { $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }] },
+      {
+        expiryDate: { $not: { $gt: new Date() } },
+        attempts: { $not: { $gte: 5 } },
+      },
       {
         $set: { expiryDate: DateUtils.getExpiryDate(expiresIn) },
         $inc: { attempts: 1 },

@@ -9,8 +9,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "start": "webpack --watch --config webpack.config.js --progress --env.mode=development -env.nodemon",
-    "start:prod": "webpack --watch --config webpack.config.js --progress --env.mode=production -env.nodemon",
+    "start": "webpack --watch --config webpack.config.js --progress --env.mode=development --env.nodemon",
+    "start:prod": "webpack --watch --config webpack.config.js --progress --env.mode=production --env.nodemon",
     "build:prod": "webpack --config webpack.config.js --progress --env.mode=production",
     "build:ci": "webpack --config webpack.config.js --env.mode=production",
     "build:docker": "docker build --rm -t toxsickcoder/tox-mq:latest .",

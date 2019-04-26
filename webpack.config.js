@@ -44,17 +44,13 @@ module.exports = env => {
         DEVELOP: env.mode === 'development',
       }),
       new webpack.NormalModuleReplacementPlugin(
-        /environment.ts/,
-        env.mode === 'development' ? 'environment.ts' : 'environment.prod.ts'
-      ),
-      new webpack.NormalModuleReplacementPlugin(
         /mongo.config.ts/,
         env.mode === 'development' ? 'mongo-config.dev.ts' : 'mongo-config.ts'
       ),
     ],
   };
 
-  if (env.mode === 'development') {
+  if (env.nodemon) {
     config.plugins.push(new NodemonPlugin());
   }
 

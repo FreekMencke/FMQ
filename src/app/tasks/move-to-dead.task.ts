@@ -4,7 +4,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { Logger } from '../common/logger';
 import { MongoUtils } from '../common/utils/mongo-utils';
 
-export const MoveToDead = (db: Db) => new CronJob('*/30 * * * * *', () => moveToDeadFactory(db));
+export const MoveToDead = (db: Db) => new CronJob('0 * * * * *', () => moveToDeadFactory(db));
 
 async function moveToDeadFactory(db: Db): Promise<void> {
   try {
@@ -15,7 +15,7 @@ async function moveToDeadFactory(db: Db): Promise<void> {
 
         await col.updateMany(
           {
-            $or: [{ expiryDate: null }, { expiryDate: { $lte: new Date() } }],
+            expiryDate: { $not: { $gt: new Date() } },
             attempts: { $gte: 5 },
             dead: { $exists: false },
           },

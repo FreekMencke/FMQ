@@ -3,7 +3,7 @@ import { Db } from 'mongodb';
 import { Logger } from '../common/logger';
 import { CommandHistory } from '../queue/command-history';
 
-export const ClearCommandHistory = (db: Db) => new CronJob('*/30 * * * * *', () => moveToDeadFactory(db));
+export const ClearCommandHistory = (db: Db) => new CronJob('*/15 * * * * *', () => moveToDeadFactory(db));
 
 async function moveToDeadFactory(db: Db): Promise<void> {
   try {

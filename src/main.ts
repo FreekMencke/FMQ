@@ -30,7 +30,7 @@ if (cluster.isMaster) {
   mongoClient
     .connect()
     .then(client => {
-      new App(client.db('tox-mq')).start(cluster.worker);
+      App.run(client.db('tox-mq'), cluster.worker);
       Tasks.start(client.db('tox-mq'));
     })
     .catch(() => cluster.worker.kill());

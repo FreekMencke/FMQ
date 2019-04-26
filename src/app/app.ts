@@ -1,7 +1,6 @@
 import bodyParser from 'body-parser';
 import { Worker } from 'cluster';
 import compression from 'compression';
-import cors from 'cors';
 import express, { Application } from 'express';
 import helmet from 'helmet';
 import { Db } from 'mongodb';
@@ -15,6 +14,12 @@ export class App {
   private _app: Application;
   private _db: Db;
 
+  static run(db: Db, worker: Worker): App {
+    const app = new App(db);
+    app.start(worker);
+    return app;
+  }
+
   constructor(db: Db) {
     this._app = express();
     this._db = db;
@@ -23,7 +28,7 @@ export class App {
     this.setupRouters();
   }
 
-  start(worker: Worker): void {
+  private start(worker: Worker): void {
     this._app.listen(config.port, () => {
       Logger.log(`WORKER ${worker.id} CREATED ON PORT ${config.port}`);
       this.setupRouters();
@@ -33,11 +38,6 @@ export class App {
   private setupMiddleware(): void {
     this._app.use(compression());
     this._app.use(helmet({ noCache: true }));
-    this._app.use(
-      cors({
-        origin: (origin, callback) => callback(null, config.allowedOrigins.includes(origin)),
-      })
-    );
     this._app.use(bodyParser.urlencoded({ extended: true }));
     this._app.use(bodyParser.json());
   }

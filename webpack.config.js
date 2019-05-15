@@ -7,19 +7,19 @@ const NodemonPlugin = require('nodemon-webpack-plugin');
 
 const packageJson = require('./package.json');
 
-module.exports = env => {
+module.exports = (env = {}) => {
   const config = {
     entry: ['./src/main.ts'],
-    mode: env.mode,
+    mode: env.development ? 'development' : 'production',
     target: 'node',
-    devtool: env.mode === 'development' ? 'cheap-eval-source-map' : false,
+    // devtool alternatives: cheap-module-eval-source-map (faster, less details) or cheap-eval-source-map (fastest, even less details)
+    devtool: env.development ? 'inline-source-map' : false,
     node: {
       __dirname: false, // Fix for native node __dirname
       __filename: false, // Fix for native node __filename
     },
     output: {
-      filename: packageJson.name + '.js',
-      path: path.resolve(__dirname, 'dist'),
+      filename: `${packageJson.name}.js`,
     },
     resolve: {
       extensions: ['.ts', '.js'],
@@ -34,6 +34,7 @@ module.exports = env => {
         {
           test: /\.ts$/,
           use: 'ts-loader',
+          exclude: /node_modules/,
         },
       ],
     },
@@ -41,16 +42,18 @@ module.exports = env => {
       new CleanWebpackPlugin(),
       new webpack.DefinePlugin({
         VERSION: JSON.stringify(packageJson.version),
-        DEVELOP: env.mode === 'development',
+        DEVELOP: env.development,
       }),
+      // Use module replacement to use different configs for dev and prod
       new webpack.NormalModuleReplacementPlugin(
-        /mongo.config.ts/,
-        env.mode === 'development' ? 'mongo-config.dev.ts' : 'mongo-config.ts'
+        /[\\/]src[\\/]config[\\/]mongo-config.ts$/, // [\\/] works on all operating systems.
+        env.development ? 'mongo-config.dev.ts' : 'mongo-config.ts'
       ),
     ],
   };
 
   if (env.nodemon) {
+    config.watch = true;
     config.plugins.push(new NodemonPlugin());
   }
 

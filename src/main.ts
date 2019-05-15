@@ -33,5 +33,8 @@ if (cluster.isMaster) {
       App.run(client.db('tox-mq'), cluster.worker);
       Tasks.start(client.db('tox-mq'));
     })
-    .catch(() => cluster.worker.kill());
+    .catch(err => {
+      Logger.log(`WORKER ${cluster.worker.id} ERROR: ${err.message}`);
+      cluster.worker.kill();
+    });
 }

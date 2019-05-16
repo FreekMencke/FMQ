@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { IConfig } from './config.interface';
 
-const secretLocation = '/run/secrets/mongo-config.json';
+const secretLocation = './src/config/secrets/mongo-config.json';
 let secretMongoConfig: { user: string; password: string; url: string } | null = null;
 
 if (existsSync(secretLocation)) {

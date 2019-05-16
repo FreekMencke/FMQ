@@ -1,10 +1,7 @@
-*.hidden.*
-
-.vscode/
-node_modules/
-scripts/
-dist/
-
+dist
+node_modules
+scripts
+.dockerignore
 .editorconfig
 .gitignore
 .travis.yml

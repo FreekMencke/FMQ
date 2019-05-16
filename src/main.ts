@@ -4,12 +4,12 @@ import os from 'os';
 import { App } from './app/app';
 import { Logger } from './app/common/logger';
 import { Tasks } from './app/tasks/tasks';
-import { mongoConfig } from './config/mongo-config';
+import { config } from './config/config';
 
-const mongoClient = new MongoClient(mongoConfig.url, {
+const mongoClient = new MongoClient(config.mongo.url, {
   auth: {
-    user: mongoConfig.user,
-    password: mongoConfig.password,
+    user: config.mongo.user,
+    password: config.mongo.password,
   },
   authMechanism: 'SCRAM-SHA-1',
   autoReconnect: true,

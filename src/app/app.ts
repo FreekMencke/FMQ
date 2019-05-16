@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { Db } from 'mongodb';
 import { config } from '../config/config';
 import { Logger } from './common/logger';
+import { responseLogger } from './middleware/logger.middleware';
 import { HealthRouterFactory } from './routes/health.router-factory';
 import { QueueRouterFactory } from './routes/queue.router-factory';
 import { RouterFactory } from './routes/router.interface';
@@ -20,7 +21,7 @@ export class App {
     return app;
   }
 
-  constructor(db: Db) {
+  private constructor(db: Db) {
     this._app = express();
     this._db = db;
 
@@ -40,6 +41,7 @@ export class App {
     this._app.use(helmet({ noCache: true, hidePoweredBy: true }));
     this._app.use(bodyParser.urlencoded({ extended: true }));
     this._app.use(bodyParser.json());
+    this._app.use(responseLogger(['/health']));
   }
 
   private setupRouters(): void {

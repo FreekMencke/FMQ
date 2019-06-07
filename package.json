@@ -1,6 +1,6 @@
 {
   "name": "tox-mq",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Freek Mencke",
   "homepage": "https://twitter.com/FreekMencke",
   "repository": {
@@ -23,9 +23,11 @@
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cron": "^1.7.1",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
+    "express-prom-bundle": "^5.1.5",
     "helmet": "^3.18.0",
-    "mongodb": "^3.2.4",
+    "mongodb": "^3.2.7",
+    "prom-client": "^11.5.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
@@ -37,14 +39,14 @@
     "@types/mongodb": "^3.1.27",
     "@types/node": "^10.14.6",
     "@types/uuid": "^3.4.4",
-    "clean-webpack-plugin": "^2.0.2",
+    "clean-webpack-plugin": "^3.0.0",
     "nodemon-webpack-plugin": "^4.0.8",
-    "ts-loader": "^6.0.0",
-    "tslint": "^5.16.0",
+    "ts-loader": "^6.0.2",
+    "tslint": "^5.17.0",
     "tslint-eslint-rules": "^5.4.0",
-    "typescript": "^3.4.5",
-    "webpack": "^4.31.0",
+    "typescript": "^3.5.1",
+    "webpack": "^4.33.0",
     "webpack-bundle-analyzer": "^3.3.2",
-    "webpack-cli": "^3.3.2"
+    "webpack-cli": "^3.3.3"
   }
 }

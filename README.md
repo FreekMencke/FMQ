@@ -10,29 +10,31 @@ ToxMQ is multithread and replica safe.
 
 ## Getting started
 
-Either clone and build this repository, or pull the [Docker container](https://cloud.docker.com/u/toxsickcoder/repository/docker/toxsickcoder/tox-mq) from Docker hub.
+Either clone and build this repository, or pull the [image](https://cloud.docker.com/u/toxsickcoder/repository/docker/toxsickcoder/tox-mq) from Docker hub.
 
-### Docker
+### Kubernetes/Docker
 
 `docker pull toxsickcoder/tox-mq:latest`
 
 To run ToxMQ from a container, provide the Mongo DB connection details. The connection details can be provided as a secret (**recommended**) or an environment variable. If both sources are provided, the environment variables will be prioritized.
 
-The container runs on port 8080, but can mapped to any port with docker.
+The container runs on port 8080, but can mapped to any port with docker. Metrics are available on port 8088 at `/metrics`.
 
-#### Docker environment variables
+#### Environment variables
 
 - **MONGO_USER**: The username used to connect to the Mongo DB.
 - **MONGO_PASSWORD**: The password used to connect to the Mongo DB.
 - **MONGO_URL**: The url used to connect to the Mongo DB (mongodb://...).
+- **MONGO_AUTHSOURCE**: The database for the user account.
 
-#### Docker secret
+#### Secret
 
 ```ts
 {
   "url": "mongodb://...",
   "user": "username",
-  "password": "password"
+  "password": "password",
+  "authSource": "authSource" // or undefined
 }
 ```
 

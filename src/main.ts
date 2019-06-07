@@ -1,4 +1,6 @@
 import cluster from 'cluster';
+import express from 'express';
+import { clusterMetrics } from 'express-prom-bundle';
 import { MongoClient } from 'mongodb';
 import os from 'os';
 import { App } from './app/app';
@@ -11,6 +13,7 @@ const mongoClient = new MongoClient(config.mongo.url, {
     user: config.mongo.user,
     password: config.mongo.password,
   },
+  authSource: config.mongo.authSource,
   authMechanism: 'SCRAM-SHA-1',
   autoReconnect: true,
   reconnectInterval: 5000,
@@ -21,6 +24,10 @@ if (cluster.isMaster) {
   Logger.log('TOXMQ ACTIVE - FORKING WORKERS');
 
   os.cpus().forEach(() => cluster.fork());
+
+  const metricsApp = express();
+  metricsApp.use('/metrics', clusterMetrics());
+  metricsApp.listen(config.portMetrics);
 
   cluster.on('exit', worker => {
     Logger.log(`WORKER ${worker.id} DIED - CREATING NEW WORKER`);

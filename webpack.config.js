@@ -2,7 +2,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const NodemonPlugin = require('nodemon-webpack-plugin');
 
 const packageJson = require('./package.json');

@@ -3,6 +3,7 @@ import express from 'express';
 import { clusterMetrics } from 'express-prom-bundle';
 import { MongoClient } from 'mongodb';
 import os from 'os';
+import { collectDefaultMetrics } from 'prom-client';
 import { App } from './app/app';
 import { Logger } from './app/common/logger';
 import { Tasks } from './app/tasks/tasks';
@@ -34,6 +35,8 @@ if (cluster.isMaster) {
     cluster.fork();
   });
 } else {
+  collectDefaultMetrics();
+
   mongoClient
     .connect()
     .then(client => {

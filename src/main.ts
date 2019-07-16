@@ -6,6 +6,7 @@ import os from 'os';
 import { collectDefaultMetrics } from 'prom-client';
 import { App } from './app/app';
 import { Logger } from './app/common/logger';
+import { CommandHistory } from './app/queue/command-history';
 import { Tasks } from './app/tasks/tasks';
 import { config } from './config/config';
 
@@ -40,8 +41,10 @@ if (cluster.isMaster) {
   mongoClient
     .connect()
     .then(client => {
-      App.run(client.db('tox-mq'), cluster.worker);
-      Tasks.start(client.db('tox-mq'));
+      const db = client.db('tox-mq');
+      App.run(db, cluster.worker);
+      Tasks.start(db);
+      CommandHistory.collection(db).createIndex('hashCode', { unique: true });
     })
     .catch(err => {
       Logger.log(`WORKER ${cluster.worker.id} ERROR: ${err.message}`);

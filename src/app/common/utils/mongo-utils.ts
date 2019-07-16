@@ -12,7 +12,7 @@ export class MongoUtils {
     find: Object,
     update: Object,
     limit: number,
-    collection: Collection
+    collection: Collection,
   ): Promise<Object[]> {
     const _uuid = uuidV4();
     let reservedCount = 0;
@@ -42,7 +42,7 @@ export class MongoUtils {
             _id: { $in: ids },
             _uuid: { $exists: false },
           },
-          { $set: { _uuid } }
+          { $set: { _uuid } },
         )).modifiedCount;
       }
 
@@ -59,7 +59,7 @@ export class MongoUtils {
         {
           ...update,
           $unset: { _uuid },
-        }
+        },
       );
     } catch (e) {}
 

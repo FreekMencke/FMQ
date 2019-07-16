@@ -4,7 +4,7 @@ import { Logger } from '../common/logger';
 export const requestLogger = (blacklist: string[] = []): RequestHandler => (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const start = process.hrtime();
 

@@ -36,7 +36,7 @@ export class Queue {
 
     const updated = await collection.updateMany(
       { _id: { $in: ids.map(id => ObjectId.createFromHexString(id)) } },
-      { expiryDate: newExpiryDate }
+      { expiryDate: newExpiryDate },
     );
 
     return updated.modifiedCount > 0 ? newExpiryDate : null;
@@ -54,7 +54,7 @@ export class Queue {
         $set: { expiryDate: DateUtils.getExpiryDate(expiresIn) },
         $inc: { attempts: 1 },
       },
-      { returnOriginal: false }
+      { returnOriginal: false },
     );
 
     return result.value;
@@ -73,7 +73,7 @@ export class Queue {
         $inc: { attempts: 1 },
       },
       amount,
-      collection
+      collection,
     );
   }
 
@@ -95,7 +95,7 @@ export class Queue {
     queue: string,
     payloads: Object[],
     hashCode?: string,
-    expiresIn?: number
+    expiresIn?: number,
   ): Promise<number> {
     const collection = MongoUtils.collection(db, queue);
 

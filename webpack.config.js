@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const NodemonPlugin = require('nodemon-webpack-plugin');
@@ -12,7 +11,6 @@ module.exports = (env = {}) => {
     entry: ['./src/main.ts'],
     mode: env.development ? 'development' : 'production',
     target: 'node',
-    // devtool alternatives: cheap-module-eval-source-map (faster, less details) or cheap-eval-source-map (fastest, even less details)
     devtool: env.development ? 'inline-source-map' : false,
     node: {
       __dirname: false, // Fix for native node __dirname

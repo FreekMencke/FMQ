@@ -39,7 +39,7 @@ export class QueueRouterFactory implements RouterFactory {
           req.params.queue,
           Number(req.query.amount) || 20,
           Number(req.query.offset) || 0,
-          JsonUtils.tryParse(req.query.filter, {})
+          JsonUtils.tryParse(req.query.filter, {}),
         );
 
         res.status(result!.length > 0 ? 200 : 204).send(result);

@@ -13,7 +13,7 @@ export class CommandHistory {
       const commandUpdate = await CommandHistory.collection(db).findOneAndUpdate(
         { hashCode },
         { $set: { hashCode, expiryDate: DateUtils.getExpiryDate(expiresIn) }, $inc: { attempts: 1 } },
-        { upsert: true }
+        { upsert: true },
       );
 
       return !commandUpdate.value;

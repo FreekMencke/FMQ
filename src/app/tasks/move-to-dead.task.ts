@@ -24,7 +24,7 @@ async function moveToDeadFactory(db: Db): Promise<void> {
               uuid,
               dead: true,
             },
-          }
+          },
         );
 
         const deadMessages = await col.find({ uuid }).toArray();
@@ -37,7 +37,7 @@ async function moveToDeadFactory(db: Db): Promise<void> {
           bulkOp
             .find({ payload })
             .upsert()
-            .update({ $set: { payload }, $inc: { attempts: 1 } })
+            .update({ $set: { payload }, $inc: { attempts: 1 } }),
         );
 
         await bulkOp.execute();

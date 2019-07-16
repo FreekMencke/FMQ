@@ -49,7 +49,7 @@ export class App {
         customLabels: { app: 'osrs-tracker-api' },
         includeMethod: true,
         includePath: true,
-      })
+      }),
     );
   }
 

@@ -1,5 +1,6 @@
 export class Logger {
   static log(...message: any[]): void {
+    // eslint-disable-next-line no-console
     console.log(`[${Logger.getFormattedTime()}]`, ...message);
   }
 

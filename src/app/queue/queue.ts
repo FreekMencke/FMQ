@@ -1,4 +1,4 @@
-import { Db, ObjectId } from 'mongodb';
+import { Db, Filter, ObjectId } from 'mongodb';
 import { DateUtils } from '../common/utils/date-utils';
 import { MongoUtils } from '../common/utils/mongo-utils';
 import { CommandHistory } from './command-history';
@@ -17,7 +17,7 @@ export class Queue {
     return deletedCount || 0;
   }
 
-  static async peek(db: Db, queue: string, amount: number, offset: number, filter: Object): Promise<Object[]> {
+  static async peek<T>(db: Db, queue: string, amount: number, offset: number, filter: Filter<T>): Promise<Object[]> {
     const collection = MongoUtils.collection(db, queue);
 
     const items = await collection
@@ -54,7 +54,7 @@ export class Queue {
         $set: { expiryDate: DateUtils.getExpiryDate(expiresIn) },
         $inc: { attempts: 1 },
       },
-      { returnOriginal: false },
+      { returnDocument: 'after' },
     );
 
     return result.value;
@@ -82,12 +82,12 @@ export class Queue {
 
     if (!(await CommandHistory.shouldExecute(db, hashCode, expiresIn))) return 0;
 
-    const insertedCount = await collection
+    const insertedId = await collection
       .insertOne({ payload })
-      .then(result => result.insertedCount)
+      .then(result => result.insertedId)
       .catch(() => CommandHistory.clearCommand(db, hashCode).then(() => 0));
 
-    return insertedCount;
+    return insertedId as number;
   }
 
   static async pushMany(
@@ -112,6 +112,6 @@ export class Queue {
   static async size(db: Db, queue: string): Promise<number> {
     const collection = MongoUtils.collection(db, queue);
 
-    return await collection.countDocuments();
+    return collection.countDocuments();
   }
 }

@@ -1,11 +1,11 @@
-import { Application, Router } from 'express';
+import express, { Application, Router } from 'express';
 import { Db } from 'mongodb';
 import { Tasks } from '../tasks/tasks';
 import { RouterFactory } from './router.interface';
 
 export class HealthRouterFactory implements RouterFactory {
   create(app: Application, db: Db): void {
-    const router = Router();
+    const router = express.Router();
 
     this.healthcheck(router, db);
 
@@ -13,7 +13,7 @@ export class HealthRouterFactory implements RouterFactory {
   }
 
   private healthcheck(router: Router, db: Db): void {
-    router.get('/', async (req, res) => {
+    router.get('/', async (_req, res) => {
       try {
         const tasksRunning =
           Tasks.runningTasks.length === Tasks.TASK_COUNT && Tasks.runningTasks.reduce((a, b) => a && b.running!, true);

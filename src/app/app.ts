@@ -1,8 +1,9 @@
 import bodyParser from 'body-parser';
 import { Worker } from 'cluster';
 import compression from 'compression';
+import cors from 'cors';
 import express, { Application } from 'express';
-import * as prometheusMetricsMiddleware from 'express-prom-bundle';
+import prometheusMetricsMiddleware from 'express-prom-bundle';
 import helmet from 'helmet';
 import { Db } from 'mongodb';
 import { config } from '../config/config';
@@ -38,15 +39,15 @@ export class App {
   }
 
   private setupMiddleware(): void {
+    this._app.use(cors());
     this._app.use(compression());
-    this._app.use(helmet({ noCache: true, hidePoweredBy: true }));
+    this._app.use(helmet({ hidePoweredBy: true }));
     this._app.use(bodyParser.urlencoded({ extended: true }));
     this._app.use(bodyParser.json());
     this._app.use(requestLogger(['/health', '/metrics']));
     this._app.use(
       prometheusMetricsMiddleware({
         autoregister: false,
-        customLabels: { app: 'osrs-tracker-api' },
         includeMethod: true,
         includePath: true,
       }),

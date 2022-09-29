@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/FreekMencke/tox-mq.svg?branch=master)](https://travis-ci.com/FreekMencke/tox-mq)
+[![Build Status](https://travis-ci.com/FreekMencke/fmq.svg?branch=master)](https://travis-ci.com/FreekMencke/fmq)
 [![GitHub license](https://img.shields.io/github/license/FreekMencke/node-typescript-starter.svg)](https://github.com/FreekMencke/node-typescript-starter/blob/master/LICENSE)
 
 # ToxMQ
@@ -10,11 +10,11 @@ ToxMQ is multithread and replica safe.
 
 ## Getting started
 
-Either clone and build this repository, or pull the [image](https://cloud.docker.com/u/toxsickcoder/repository/docker/toxsickcoder/tox-mq) from Docker hub.
+Either clone and build this repository, or pull the [image](https://cloud.docker.com/u/toxsickcoder/repository/docker/toxsickcoder/fmq) from Docker hub.
 
 ### Kubernetes/Docker
 
-`docker pull toxsickcoder/tox-mq:latest`
+`docker pull toxsickcoder/fmq:latest`
 
 To run ToxMQ from a container, provide the Mongo DB connection details. The connection details can be provided as a secret (**recommended**) or an environment variable. If both sources are provided, the environment variables will be prioritized.
 

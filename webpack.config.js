@@ -1,7 +1,8 @@
 'use strict';
 
-const webpack = require('webpack');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { resolve } = require('path');
+const { DefinePlugin, NormalModuleReplacementPlugin } = require('webpack');
+const nodeExternals = require('webpack-node-externals');
 const NodemonPlugin = require('nodemon-webpack-plugin');
 
 const packageJson = require('./package.json');
@@ -9,6 +10,7 @@ const packageJson = require('./package.json');
 module.exports = (env = {}) => {
   const config = {
     entry: ['./src/main.ts'],
+    externals: [nodeExternals()],
     mode: env.development ? 'development' : 'production',
     target: 'node',
     devtool: env.development ? 'inline-source-map' : false,
@@ -18,6 +20,8 @@ module.exports = (env = {}) => {
     },
     output: {
       filename: `${packageJson.name}.js`,
+      path: resolve(__dirname, 'dist'),
+      clean: true,
     },
     resolve: {
       extensions: ['.ts', '.js'],
@@ -25,8 +29,10 @@ module.exports = (env = {}) => {
     },
     stats: {
       modules: false, // We don't need to see this
-      warningsFilter: /^(?!CriticalDependenciesWarning$)/,
     },
+    ignoreWarnings: [{
+      message: /^(?!CriticalDependenciesWarning$)/,
+    }],
     module: {
       rules: [
         {
@@ -37,13 +43,12 @@ module.exports = (env = {}) => {
       ],
     },
     plugins: [
-      new CleanWebpackPlugin(),
-      new webpack.DefinePlugin({
+      new DefinePlugin({
         VERSION: JSON.stringify(packageJson.version),
-        DEVELOP: env.development,
+        DEVELOP: !!env.development,
       }),
       // Use module replacement to use different configs for dev and prod
-      new webpack.NormalModuleReplacementPlugin(
+      new NormalModuleReplacementPlugin(
         /[\\/]src[\\/]config[\\/]config.ts$/, // [\\/] works on all operating systems.
         env.development ? 'config.dev.ts' : 'config.ts'
       ),
@@ -56,7 +61,8 @@ module.exports = (env = {}) => {
   }
 
   if (env.analyse) {
-    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+    const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
     config.plugins.push(
       new BundleAnalyzerPlugin({
         analyzerMode: 'static', // Generates file instead of starting a web server

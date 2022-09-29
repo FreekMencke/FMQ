@@ -1,4 +1,4 @@
-import { Collection, Db } from 'mongodb';
+import { Collection, Db, ObjectId } from 'mongodb';
 import { v4 as uuidV4 } from 'uuid';
 
 export class MongoUtils {
@@ -16,8 +16,8 @@ export class MongoUtils {
   ): Promise<Object[]> {
     const _uuid = uuidV4();
     let reservedCount = 0;
-    let ids: string[] = [];
-    let reservedIds: string[] = [];
+    let ids: ObjectId[] = [];
+    let reservedIds: ObjectId[] = [];
 
     try {
       while (reservedCount < limit) {

@@ -1,7 +1,7 @@
 'use strict';
 
 const { resolve } = require('path');
-const { DefinePlugin, NormalModuleReplacementPlugin } = require('webpack');
+const { NormalModuleReplacementPlugin } = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const NodemonPlugin = require('nodemon-webpack-plugin');
 
@@ -43,10 +43,6 @@ module.exports = (env = {}) => {
       ],
     },
     plugins: [
-      new DefinePlugin({
-        VERSION: JSON.stringify(packageJson.version),
-        DEVELOP: !!env.development,
-      }),
       // Use module replacement to use different configs for dev and prod
       new NormalModuleReplacementPlugin(
         /[\\/]src[\\/]config[\\/]config.ts$/, // [\\/] works on all operating systems.

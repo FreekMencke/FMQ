@@ -34,7 +34,6 @@ export class App {
   private start(worker: Worker): void {
     this._app.listen(config.port, () => {
       Logger.log(`WORKER ${worker.id} CREATED ON PORT ${config.port}`);
-      this.setupRouters();
     });
   }
 

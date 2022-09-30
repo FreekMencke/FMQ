@@ -1,22 +1,22 @@
 [![Build Status](https://travis-ci.com/FreekMencke/fmq.svg?branch=master)](https://travis-ci.com/FreekMencke/fmq)
 [![GitHub license](https://img.shields.io/github/license/FreekMencke/node-typescript-starter.svg)](https://github.com/FreekMencke/node-typescript-starter/blob/master/LICENSE)
 
-# ToxMQ
+# FMQ
 
-ToxMQ is a simple message queuing system with little overhead.
+FMQ is a simple message queuing system with little overhead.
 It is exposed through an Express API and preserved through a Mongo database.
 
-ToxMQ is multithread and replica safe.
+FMQ is multithread and replica safe.
 
 ## Getting started
 
-Either clone and build this repository, or pull the [image](https://cloud.docker.com/u/toxsickcoder/repository/docker/toxsickcoder/fmq) from Docker hub.
+Either clone and build this repository, or pull the [image](https://cloud.docker.com/u/freekmencke/repository/) from Docker hub.
 
 ### Kubernetes/Docker
 
-`docker pull toxsickcoder/fmq:latest`
+`docker pull freekmencke/fmq:latest`
 
-To run ToxMQ from a container, provide the Mongo DB connection details. The connection details can be provided as a secret (**recommended**) or an environment variable. If both sources are provided, the environment variables will be prioritized.
+To run FMQ from a container, provide the Mongo DB connection details. The connection details can be provided as a secret (**recommended**) or an environment variable. If both sources are provided, the environment variables will be prioritized.
 
 The container runs on port 8080, but can mapped to any port with docker. Metrics are available on port 8088 at `/metrics`.
 
@@ -42,7 +42,7 @@ The container runs on port 8080, but can mapped to any port with docker. Metrics
 
 ### Actions
 
-ToxMQ uses basic MQ concepts with a few extra features. The available actions are:
+FMQ uses basic MQ concepts with a few extra features. The available actions are:
 
 - [AckMany](#ackmany)
 - [Peek](#peek)
@@ -54,11 +54,11 @@ ToxMQ uses basic MQ concepts with a few extra features. The available actions ar
 
 ### Multi threading and replicating
 
-All actions are **safe to be called simultaniously**, which makes ToxMQ perfect to use with docker replicas for example.
+All actions are **safe to be called simultaniously**, which makes FMQ perfect to use with docker replicas for example.
 
 ### Command History
 
-ToxMQ also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and can therefor be ignored. Command history is used by sending a unique hash and a duration during which duplicate messages shouldn't be added to the queue (default 300 seconds).
+FMQ also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and can therefor be ignored. Command history is used by sending a unique hash and a duration during which duplicate messages shouldn't be added to the queue (default 300 seconds).
 
 ### Dead queue
 

@@ -6,9 +6,9 @@ export const config: IConfig = {
   portMetrics: Number(process.env.PORT_METRICS) || 8088,
   mongo: {
     url: process.env.MONGO_URL ?? 'mongodb://127.0.0.1:27017',
-    user: process.env.MONGO_USER ?? 'admin',
-    password: process.env.MONGO_PASSWORD ?? 'test',
-    authSource: process.env.MONGO_AUTHSOURCE ?? 'admin',
-    authMechanism: process.env.MONGO_URL as AuthMechanism ?? AuthMechanism.MONGODB_SCRAM_SHA1,
+    user: process.env.MONGO_USER,
+    password: process.env.MONGO_PASSWORD,
+    authSource: process.env.MONGO_AUTHSOURCE,
+    authMechanism: process.env.MONGO_URL as AuthMechanism ?? AuthMechanism.MONGODB_DEFAULT,
   },
 };

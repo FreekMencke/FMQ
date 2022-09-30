@@ -1,5 +1,6 @@
-[![Build Status](https://travis-ci.com/FreekMencke/fmq.svg?branch=master)](https://travis-ci.com/FreekMencke/fmq)
-[![GitHub license](https://img.shields.io/github/license/FreekMencke/node-typescript-starter.svg)](https://github.com/FreekMencke/node-typescript-starter/blob/master/LICENSE)
+![CI](https://github.com/FreekMencke/fmq/workflows/CI/badge.svg)
+[![GitHub issues](https://img.shields.io/github/issues/FreekMencke/fmq.svg)](https://github.com/FreekMencke/fmq/issues)
+[![GitHub license](https://img.shields.io/github/license/FreekMencke/fmq.svg)](https://github.com/FreekMencke/fmq/blob/master/LICENSE)
 
 # FMQ
 

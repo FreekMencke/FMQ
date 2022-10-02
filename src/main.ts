@@ -3,7 +3,6 @@ import express from 'express';
 import { clusterMetrics } from 'express-prom-bundle';
 import { MongoClient } from 'mongodb';
 import os from 'os';
-import { collectDefaultMetrics } from 'prom-client';
 import { App } from './app/app';
 import { Logger } from './app/common/logger';
 import { CommandHistory } from './app/queue/command-history';
@@ -35,15 +34,14 @@ if (cluster.isPrimary) {
     cluster.fork();
   });
 } else {
-  collectDefaultMetrics();
-
   mongoClient
     .connect()
     .then(client => {
       const db = client.db('fmq');
-      App.run(db, cluster.worker!);
-      Tasks.start(db);
       CommandHistory.collection(db).createIndex('hashCode', { unique: true });
+
+      Tasks.start(db);
+      App.run(db, cluster.worker!);
     })
     .catch(err => {
       Logger.log(`WORKER ${cluster.worker!.id} ERROR: ${err.message}`);

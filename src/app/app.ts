@@ -6,6 +6,7 @@ import express, { Application } from 'express';
 import prometheusMetricsMiddleware from 'express-prom-bundle';
 import helmet from 'helmet';
 import { Db } from 'mongodb';
+import { AggregatorRegistry } from 'prom-client';
 import { config } from '../config/config';
 import { Logger } from './common/logger';
 import { requestLogger } from './middleware/logger.middleware';
@@ -49,6 +50,11 @@ export class App {
         autoregister: false,
         includeMethod: true,
         includePath: true,
+        promClient: {
+          collectDefaultMetrics: {
+            register: new AggregatorRegistry(),
+          },
+        },
       }),
     );
   }

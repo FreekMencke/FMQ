@@ -11,7 +11,7 @@ FMQ is multithread and replica safe.
 
 ## Getting started
 
-Either clone and build this repository, or pull the [image](https://cloud.docker.com/u/freekmencke/repository/) from Docker hub.
+Either clone and build this repository, or pull the [image](https://hub.docker.com/r/freekmencke/fmq) from Docker hub.
 
 ### Kubernetes/Docker
 

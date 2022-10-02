@@ -4,6 +4,7 @@ import { MongoUtils } from '../common/utils/mongo-utils';
 import { CommandHistory } from './command-history';
 
 export class Queue {
+
   static async ackMany(db: Db, queue: string, ids: string[]): Promise<number> {
     const collection = MongoUtils.collection(db, queue);
 
@@ -82,12 +83,12 @@ export class Queue {
 
     if (!(await CommandHistory.shouldExecute(db, hashCode, expiresIn))) return 0;
 
-    const insertedId = await collection
+    const insertedCount = await collection
       .insertOne({ payload })
-      .then(result => result.insertedId)
-      .catch(() => CommandHistory.clearCommand(db, hashCode).then(() => 0));
+      .then(result => result.insertedId ? 1 : 0)
+      .catch(e => CommandHistory.clearCommand(db, hashCode).then(() => { throw e; }));
 
-    return insertedId as number;
+    return insertedCount;
   }
 
   static async pushMany(
@@ -104,7 +105,7 @@ export class Queue {
     const insertedCount = await collection
       .insertMany(payloads.map(payload => ({ payload })), { ordered: false })
       .then(result => result.insertedCount)
-      .catch(() => CommandHistory.clearCommand(db, hashCode).then(() => 0));
+      .catch(e => CommandHistory.clearCommand(db, hashCode).then(() => { throw e; }));
 
     return insertedCount;
   }
@@ -114,4 +115,5 @@ export class Queue {
 
     return collection.countDocuments();
   }
+
 }

@@ -21,7 +21,7 @@
     "analyse:dev": "webpack --progress --env development --env analyse && start dist/report.html",
     "analyse:prod": "webpack --progress --env analyse && start dist/report.html",
     "lint": "eslint . --ext .ts",
-    "swagger": "nodemon ./scripts/swagger.js --ignore ./dist"
+    "swagger": "nodemon -e ts,js ./scripts/swagger.js"
   },
   "dependencies": {
     "body-parser": "^1.20.0",

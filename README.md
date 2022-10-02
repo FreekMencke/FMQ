@@ -22,22 +22,16 @@ To run FMQ from a container, provide the Mongo DB connection details. The connec
 The container runs on port 8080, but can mapped to any port with docker. Metrics are available on port 8088 at `/metrics`.
 
 #### Environment variables
+- **ALLOWED_ORIGINS**: Comma separated list of allowed origins (CORS).
+
+- **PORT**: The port FQM will listen for requests (default `8080`).
+- **PORT_METRICS**: The port where metrics can be queried (default `8088`)
 
 - **MONGO_USER**: The username used to connect to the Mongo DB.
 - **MONGO_PASSWORD**: The password used to connect to the Mongo DB.
 - **MONGO_URL**: The url used to connect to the Mongo DB (mongodb://...).
-- **MONGO_AUTHSOURCE**: The database for the user account.
-
-#### Secret
-
-```ts
-{
-  "url": "mongodb://...",
-  "user": "username",
-  "password": "password",
-  "authSource": "authSource" // or undefined
-}
-```
+- **MONGO_AUTHSOURCE**: The database associated with the user credentials.
+- **MONGO_AUTHMECHANISM**: The authentication mechanism that MongoDB will use for the connection.
 
 ## Concepts
 
@@ -59,7 +53,7 @@ All actions are **safe to be called simultaniously**, which makes FMQ perfect to
 
 ### Command History
 
-FMQ also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and can therefor be ignored. Command history is used by sending a unique hash and a duration during which duplicate messages shouldn't be added to the queue (default 300 seconds).
+FMQ also utilizes a concept called **Command history**. Command history can be used by **Push** actions to determine if a push with that data has already occured, and can therefore be ignored. Command history is used by sending a unique hash and a duration during which duplicate messages shouldn't be added to the queue (default 300 seconds).
 
 ### Dead queue
 

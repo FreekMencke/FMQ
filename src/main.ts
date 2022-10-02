@@ -21,7 +21,7 @@ const mongoClient = new MongoClient(config.mongo.url,
 );
 
 if (cluster.isPrimary) {
-  Logger.log('TOXMQ ACTIVE - FORKING WORKERS');
+  Logger.log('FMQ ACTIVE - FORKING WORKERS');
 
   os.cpus().forEach(() => cluster.fork());
 

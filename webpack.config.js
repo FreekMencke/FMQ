@@ -1,7 +1,6 @@
 'use strict';
 
 const { resolve } = require('path');
-const { NormalModuleReplacementPlugin } = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const NodemonPlugin = require('nodemon-webpack-plugin');
 
@@ -10,7 +9,7 @@ const packageJson = require('./package.json');
 module.exports = (env = {}) => {
   const config = {
     entry: ['./src/main.ts'],
-    externals: [nodeExternals()],
+    externals: nodeExternals(),
     mode: env.development ? 'development' : 'production',
     target: 'node',
     devtool: env.development ? 'inline-source-map' : false,
@@ -41,29 +40,19 @@ module.exports = (env = {}) => {
           exclude: /node_modules/,
         },
       ],
-    },
-    plugins: [
-      // Use module replacement to use different configs for dev and prod
-      new NormalModuleReplacementPlugin(
-        /[\\/]src[\\/]config[\\/]config.ts$/, // [\\/] works on all operating systems.
-        env.development ? 'config.dev.ts' : 'config.ts'
-      ),
-    ],
+    }
   };
 
   if (env.nodemon) {
     config.watch = true;
-    config.plugins.push(new NodemonPlugin());
+    config.plugins = [new NodemonPlugin()];
   }
 
   if (env.analyse) {
     const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-
-    config.plugins.push(
-      new BundleAnalyzerPlugin({
-        analyzerMode: 'static', // Generates file instead of starting a web server
-      })
-    );
+    config.plugins = new BundleAnalyzerPlugin({
+      analyzerMode: 'static', // Generates file instead of starting a web server
+    });
   }
 
   return config;

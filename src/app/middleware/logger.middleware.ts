@@ -1,5 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { Logger } from '../common/logger';
+import { LogUtils } from '../common/log-utils';
 
 export const requestLogger = (blacklist: string[] = []): RequestHandler => (
   req: Request,
@@ -13,9 +13,9 @@ export const requestLogger = (blacklist: string[] = []): RequestHandler => (
   if (blacklist.some(url => req.originalUrl.startsWith(url))) return;
 
   res.on('finish', () => {
-    const end = process.hrtime(start);
-    const elapsedTime = `${Math.floor(end[0] * 1000 + end[1] / 1000000)}ms`;
+    const [seconds, nanoseconds] = process.hrtime(start);
+    const elapsedTime = `${Math.floor((seconds * 1e3) + (nanoseconds / 1e6))}ms`;
 
-    Logger.log(req.method, req.originalUrl + ';', res.statusCode, res.statusMessage + ';', elapsedTime);
+    LogUtils.log(req.method, req.originalUrl + ';', res.statusCode, res.statusMessage + ';', elapsedTime);
   });
 };

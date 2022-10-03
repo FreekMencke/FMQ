@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser';
 import { Worker } from 'cluster';
 import compression from 'compression';
 import cors from 'cors';
@@ -8,7 +7,7 @@ import helmet from 'helmet';
 import { Db } from 'mongodb';
 import { AggregatorRegistry } from 'prom-client';
 import { config } from '../config/config';
-import { Logger } from './common/logger';
+import { LogUtils } from './common/log-utils';
 import { requestLogger } from './middleware/logger.middleware';
 import { HealthRouterFactory } from './routes/health.router-factory';
 import { QueueRouterFactory } from './routes/queue.router-factory';
@@ -34,16 +33,15 @@ export class App {
 
   private start(worker: Worker): void {
     this._app.listen(config.port, () => {
-      Logger.log(`WORKER ${worker.id} CREATED ON PORT ${config.port}`);
+      LogUtils.log(`WORKER ${worker.id} CREATED ON PORT ${config.port}`);
     });
   }
 
   private setupMiddleware(): void {
     this._app.use(cors({ origin: config.allowedOrigins }));
     this._app.use(compression());
-    this._app.use(helmet({ hidePoweredBy: true }));
-    this._app.use(bodyParser.urlencoded({ extended: true }));
-    this._app.use(bodyParser.json());
+    this._app.use(helmet());
+    this._app.use(express.json());
     this._app.use(requestLogger(['/health', '/metrics']));
     this._app.use(
       prometheusMetricsMiddleware({

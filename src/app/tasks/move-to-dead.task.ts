@@ -1,8 +1,8 @@
 import { CronJob } from 'cron';
 import { Db } from 'mongodb';
-import { v4 as uuidV4 } from 'uuid';
-import { Logger } from '../common/logger';
-import { MongoUtils } from '../common/utils/mongo-utils';
+import { CryptoUtils } from '../common/crypto-utils';
+import { LogUtils } from '../common/log-utils';
+import { MongoUtils } from '../common/mongo-utils';
 
 export const MoveToDead = (db: Db) => new CronJob('0 * * * * *', () => moveToDeadFactory(db));
 
@@ -11,7 +11,7 @@ async function moveToDeadFactory(db: Db): Promise<void> {
     (await db.collections())
       .filter(col => col.collectionName.startsWith(MongoUtils.QUEUE_PREFIX) && !col.collectionName.endsWith('-dead'))
       .forEach(async col => {
-        const uuid = uuidV4();
+        const dead_uid = CryptoUtils.generateId();
 
         await col.updateMany(
           {
@@ -21,13 +21,13 @@ async function moveToDeadFactory(db: Db): Promise<void> {
           },
           {
             $set: {
-              uuid,
+              dead_uid,
               dead: true,
             },
           },
         );
 
-        const deadMessages = await col.find({ uuid }).toArray();
+        const deadMessages = await col.find({ dead_uid }).toArray();
 
         if (deadMessages.length === 0) return;
 
@@ -44,7 +44,7 @@ async function moveToDeadFactory(db: Db): Promise<void> {
         await col.deleteMany({ _id: { $in: deadMessages.map(msg => msg._id) } });
       });
   } catch (e) {
-    Logger.logTask('CLEAR_COMMAND_HISTORY', 'FAILED TO PERFORM CLEAR_COMMAND_HISTORY\n', e);
-    Logger.logTask('MOVE_TO_DEAD', 'FAILED TO PERFORM MOVE_TO_DEAD\n', e);
+    LogUtils.logTask('CLEAR_COMMAND_HISTORY', 'FAILED TO PERFORM CLEAR_COMMAND_HISTORY\n', e);
+    LogUtils.logTask('MOVE_TO_DEAD', 'FAILED TO PERFORM MOVE_TO_DEAD\n', e);
   }
 }

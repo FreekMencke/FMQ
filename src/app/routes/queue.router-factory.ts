@@ -1,6 +1,6 @@
 import express, { Application, Router } from 'express';
 import { Db } from 'mongodb';
-import { JsonUtils } from '../common/utils/json-utils';
+import { JsonUtils } from '../common/json-utils';
 import { Queue } from '../queue/queue';
 import { RouterFactory } from './router.interface';
 

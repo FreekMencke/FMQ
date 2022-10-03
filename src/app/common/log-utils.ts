@@ -1,11 +1,11 @@
-export class Logger {
+export class LogUtils {
   static log(...message: any[]): void {
     // eslint-disable-next-line no-console
-    console.log(`[${Logger.getFormattedTime()}]`, ...message);
+    console.log(`[${LogUtils.getFormattedTime()}]`, ...message);
   }
 
   static logTask(name: string, ...message: any[]): void {
-    Logger.log(`${name}:`, ...message);
+    LogUtils.log(`${name}:`, ...message);
   }
 
   private static getFormattedTime(includeDate: boolean = true): string {

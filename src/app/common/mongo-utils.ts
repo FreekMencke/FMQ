@@ -1,5 +1,5 @@
-import { Collection, Db, ObjectId } from 'mongodb';
-import { v4 as uuidV4 } from 'uuid';
+import { Collection, Db, Document, Filter, ObjectId, UpdateFilter } from 'mongodb';
+import { CryptoUtils } from './crypto-utils';
 
 export class MongoUtils {
   static readonly QUEUE_PREFIX = 'queue-';
@@ -9,12 +9,12 @@ export class MongoUtils {
   }
 
   static async findAndUpdateMany(
-    find: Object,
-    update: Object,
+    filter: Filter<Document>,
+    update: UpdateFilter<Document>,
     limit: number,
     collection: Collection,
-  ): Promise<Object[]> {
-    const _uuid = uuidV4();
+  ): Promise<Document[]> {
+    const faum_uid = CryptoUtils.generateId();
     let reservedCount = 0;
     let ids: ObjectId[] = [];
     let reservedIds: ObjectId[] = [];
@@ -24,8 +24,8 @@ export class MongoUtils {
         // Find requested amount of messages without expiryDate or uuid
         ids = await collection
           .find({
-            ...find,
-            _uuid: { $exists: false },
+            ...filter,
+            faum_uid: { $exists: false },
           })
           .limit(limit)
           .map(doc => doc._id)
@@ -40,15 +40,15 @@ export class MongoUtils {
         reservedCount += (await collection.updateMany(
           {
             _id: { $in: ids },
-            _uuid: { $exists: false },
+            faum_uid: { $exists: false },
           },
-          { $set: { _uuid } },
+          { $set: { faum_uid } },
         )).modifiedCount;
       }
 
       // Fetch reserved ids
       reservedIds = await collection
-        .find({ _uuid })
+        .find({ faum_uid })
         .limit(limit)
         .map(doc => doc._id)
         .toArray();
@@ -58,15 +58,15 @@ export class MongoUtils {
         { _id: { $in: reservedIds } },
         {
           ...update,
-          $unset: { _uuid },
+          $unset: { faum_uid },
         },
       );
     } catch (e) {}
 
     // Unclaim all
-    await collection.updateMany({ _uuid }, { $unset: { _uuid } });
+    await collection.updateMany({ faum_uid }, { $unset: { faum_uid } });
 
     // Fetch and return claimed messages
-    return (await collection.find({ _id: { $in: reservedIds } })).toArray();
+    return collection.find({ _id: { $in: reservedIds } }).toArray();
   }
 }

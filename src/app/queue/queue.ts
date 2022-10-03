@@ -1,6 +1,6 @@
 import { Db, Filter, ObjectId } from 'mongodb';
-import { DateUtils } from '../common/utils/date-utils';
-import { MongoUtils } from '../common/utils/mongo-utils';
+import { DateUtils } from '../common/date-utils';
+import { MongoUtils } from '../common/mongo-utils';
 import { CommandHistory } from './command-history';
 
 export class Queue {

@@ -1,5 +1,5 @@
 import { Collection, Db } from 'mongodb';
-import { DateUtils } from '../common/utils/date-utils';
+import { DateUtils } from '../common/date-utils';
 
 export class CommandHistory {
   public static readonly COMMAND_HISTORY_COLLECTION = 'command-history';

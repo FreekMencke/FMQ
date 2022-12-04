@@ -17,10 +17,8 @@ export class App {
   private _app: Application;
   private _db: Db;
 
-  static run(db: Db, worker: Worker): App {
-    const app = new App(db);
-    app.start(worker);
-    return app;
+  static run(db: Db, worker: Worker): void {
+    new App(db).start(worker);
   }
 
   private constructor(db: Db) {

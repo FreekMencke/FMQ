@@ -4,7 +4,6 @@ scripts
 .dockerignore
 .editorconfig
 .gitignore
-.travis.yml
 Dockerfile
 LICENSE
 README.md

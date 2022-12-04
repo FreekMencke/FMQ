@@ -1,6 +1,3 @@
 dist
 node_modules
-scripts
 .vscode
-.eslintrc.js
-webpack.config.js

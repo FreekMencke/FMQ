@@ -21,7 +21,8 @@ export class QueueRouterFactory implements RouterFactory {
 
   private acknowledge(router: Router, db: Db): void {
     router.post('/:queue/ack', async (req, res) => {
-      /*  #swagger.parameters['ids'] = { in: 'body', schema: ['id'] } */
+      // #swagger.tags = ['Queue']
+      // #swagger.parameters['ids'] = { in: 'body', schema: ['id'] }
       try {
         await Queue.ackMany(db, req.params.queue, req.body);
 
@@ -34,6 +35,7 @@ export class QueueRouterFactory implements RouterFactory {
 
   private peek(router: Router, db: Db): void {
     router.get('/:queue/peek', async (req, res) => {
+      // #swagger.tags = ['Queue']
       try {
         const result = await Queue.peek(
           db,
@@ -52,7 +54,8 @@ export class QueueRouterFactory implements RouterFactory {
 
   private ping(router: Router, db: Db): void {
     router.post('/:queue/ping', async (req, res) => {
-      /*  #swagger.parameters['ids'] = { in: 'body', schema: ['id'] } */
+      // #swagger.tags = ['Queue']
+      // #swagger.parameters['ids'] = { in: 'body', schema: ['id'] }
       try {
         const result = await Queue.pingMany(db, req.params.queue, req.body, Number(req.query.expiresIn as string));
 
@@ -66,6 +69,7 @@ export class QueueRouterFactory implements RouterFactory {
 
   private pop(router: Router, db: Db): void {
     router.post('/:queue/pop', async (req, res) => {
+      // #swagger.tags = ['Queue']
       try {
         const result = await Queue.popOne(db, req.params.queue, Number(req.query.expiresIn as string));
 
@@ -78,6 +82,7 @@ export class QueueRouterFactory implements RouterFactory {
 
   private popAmount(router: Router, db: Db): void {
     router.post('/:queue/pop/:amount', async (req, res) => {
+      // #swagger.tags = ['Queue']
       try {
         const result = await Queue.popMany(db, req.params.queue, Number(req.params.amount), Number(req.query.expiresIn as string));
 
@@ -90,7 +95,8 @@ export class QueueRouterFactory implements RouterFactory {
 
   private push(router: Router, db: Db): void {
     router.post('/:queue/push', async (req, res) => {
-      /*  #swagger.parameters['payload'] = { in: 'body', schema: [{}] } */
+      // #swagger.tags = ['Queue']
+      // #swagger.parameters['payload'] = { in: 'body', schema: [{}] }
       try {
         const result =
           req.body instanceof Array
@@ -106,6 +112,7 @@ export class QueueRouterFactory implements RouterFactory {
 
   private size(router: Router, db: Db): void {
     router.get('/:queue/size', async (req, res) => {
+      // #swagger.tags = ['Queue']
       try {
         const size = await Queue.size(db, req.params.queue);
 

@@ -14,6 +14,7 @@ export class HealthRouterFactory implements RouterFactory {
 
   private healthcheck(router: Router, db: Db): void {
     router.get('/', async (_req, res) => {
+      // #swagger.tags = ['Health']
       try {
         const tasksRunning =
           Tasks.runningTasks.length === Tasks.TASK_COUNT && Tasks.runningTasks.reduce((a, b) => a && b.running!, true);

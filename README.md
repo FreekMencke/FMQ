@@ -57,7 +57,7 @@ FMQ also utilizes a concept called **Command history**. Command history can be u
 
 ### Dead queue
 
-Some messages might not be able to complete successfully. To prevent the message from being permanently in the queue there is the **dead queue** system. After a messages has had 5 unsuccessful attempts, the message will be move to a dead queue. A dead queue is a queue with the same name as the normal queue, appended with `-dead`.
+Some messages might not be able to complete successfully. To prevent the message from being permanently in the queue there is the **dead queue** system. After a message has had 5 unsuccessful attempts, the message will be moved to a dead queue. A dead queue is a queue with the same name as the normal queue, appended with `-dead`.
 
 For example we have a `player-hiscore-scraper` queue we use to push players to we want to have scraped. Somehow a non-existing username gets pushed and it fails 5 times. The user then gets moved to the `player-hiscore-scraper-dead` queue.
 
